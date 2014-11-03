@@ -20,7 +20,7 @@ ADD_EXECUTABLE(Simulation
 	  Simulation.cpp
 	  Simulation.h
 	  SimulationManager.cpp
-	  SimualtionManager.h
+	  SimulationManager.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  
