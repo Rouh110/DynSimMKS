@@ -219,7 +219,7 @@ void MiniGL::drawPoint (const Vector3d &translation, const float pointSize, cons
 /** Zeichnet einen Quader an der Stelle translation 
   * in der übergebenen Farbe.
   */
-void MiniGL::drawCube (Vector3d *translation, Matrix3d *rotation, float width, float height, float depth, float *color)
+void MiniGL::drawCube (Vector3d *translation, Matrix3d *rotation, float width, float height, float depth, const float const *color)
 {
 	float speccolor [4] = {1.0, 1.0, 1.0, 1.0};
 	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT, color);

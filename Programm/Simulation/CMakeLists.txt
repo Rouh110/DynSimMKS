@@ -10,6 +10,17 @@ ADD_EXECUTABLE(Simulation
 	  SimMath.h
 	  TimeManager.cpp
 	  TimeManager.h
+	  Cube.cpp
+	  Cube.h
+	  IForce.h
+	  ObjectManager.cpp
+	  ObjectManager.h
+	  RigidBody.cpp
+	  RigidBody.h
+	  Simulation.cpp
+	  Simulation.h
+	  SimulationManager.cpp
+	  SimualtionManager.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  

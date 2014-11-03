@@ -158,7 +158,7 @@ namespace IBDS
 		static void drawBitmapText (float x, float y, const char *str, int strLength, float *color);
 		static void drawStrokeText (const Real x, const Real y, const Real z, float scale, const char *str, int strLength, float *color);
 		static void drawStrokeText (const Eigen::Vector3d &pos, float scale, const char *str, int strLength, float *color);
-		static void drawCube (Eigen::Vector3d *translation, Eigen::Matrix3d *rotation, float width, float height, float depth, float *color);		
+		static void drawCube (Eigen::Vector3d *translation, Eigen::Matrix3d *rotation, float width, float height, float depth, const float const *color);		
 		static void drawPoint (const Eigen::Vector3d &translation, const float pointSize, const float * const color);
 		static void setViewport (float pfovy, float pznear, float pzfar, const Eigen::Vector3d &peyepoint, const Eigen::Vector3d &plookat);
 		static void setViewport (float pfovy, float pznear, float pzfar);

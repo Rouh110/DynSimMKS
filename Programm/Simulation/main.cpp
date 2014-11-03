@@ -44,7 +44,10 @@ void buildModel ();
 void render ();
 void cleanup();
 
-#include "SimMath.h"
+#include "Simulation/SimMath.h"
+#include "Simulation/Cube.h";
+#include "Simulation/SimulationManager.h";
+#include "Simulation/TestClass.h"
 
 // main 
 int main( int argc, char **argv )
@@ -73,17 +76,28 @@ int main( int argc, char **argv )
 
 void cleanup()
 {
+	delete SimulationManager::getInstance();
 }
 
 void timeStep ()
 {
 	START_TIMING("timeStep");
-
 	TimeManager *tm = TimeManager::getCurrent ();
 	const Real h = tm->getTimeStepSize();
 
 	// Simulation code
 
+	//add globalForces
+
+	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+	{
+		Vector3d force(0.1,0,0);
+		rigidBody->addForce(force, Vector3d(0,1,1));
+		rigidBody->addForce(force*-1);
+	}
+
+	//update Simulation
+	SimulationManager::getInstance()->getSimulation().update(h);
 	tm->setTime(tm->getTime() + h);
 
 	STOP_TIMING_AVG;
@@ -92,17 +106,38 @@ void timeStep ()
 void buildModel ()
 {
 	TimeManager::getCurrent ()->setTimeStepSize (0.01);
-
 	// Create simulation model
+	Cube * cube = new Cube(1.0, 5.0, 1.0);
+	//cube->setRotation(Quaterniond(1,1,0.5,0).normalized());
+	SimulationManager::getInstance()->getObjectManager().addObject(cube);
+	//RigidBody * r = new RigidBody();	
+	//TestClass *p = new TestClass();
+	//TestClass test;
+	//delete test;
+
+	
 }
 
-
+double i = 0;
 void render ()
 {
 	MiniGL::coordinateSystem();
 	
 	// Draw simulation model
 
+	Vector3d pos;	
+	Cube *c;
+
+	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+	{
+		c = (Cube*)rigidBody;
+		pos = c->getPosition();
+		//c->setRotation(q);
+		//c->setPosition(Vector3d(i,0,0));
+		MiniGL::drawCube(&pos, &(c->getRotation().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
+	}
+
 	MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());
+
 }
 
