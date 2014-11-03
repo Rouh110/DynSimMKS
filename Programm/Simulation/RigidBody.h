@@ -4,7 +4,10 @@
 #include <Eigen/Dense>
 
 
-
+/*
+Represents an Rigidbody
+The Rigidbody will be Static if the mass is set to 0.
+*/
 class RigidBody
 {
 protected:
@@ -33,14 +36,26 @@ public:
 	const Eigen::Vector3d& getForce() const;
 	const Eigen::Quaterniond& getRotation() const;
 	
-
+	/*
+	Sets the mass. The Rigidbody will be static if the mass is 0.
+	*/
 	void setMass(Real mass);
 	void setPosition(const Eigen::Vector3d &position);
 	void setVelocity(const Eigen::Vector3d &velocity);
 	void setAngulaVelocity(const Eigen::Vector3d &angulaVelocity);
+	/*
+	Adds an Force for the Rigidbody at the given position in global space.
+	*/
 	void addForceAtGlobalPosition(const Eigen::Vector3d &force, const Eigen::Vector3d &position);
+	/*
+	Adds an Force for the RigidBody at the given position in local space
+	*/
 	void addForce(const Eigen::Vector3d &force, const Eigen::Vector3d &position);
 	void addForce(const Eigen::Vector3d &force);
+
+	/*
+	Resets the fores to zero.
+	*/
 	void resetForces();
 	void setRotation(const Eigen::Quaterniond & rotation);
 

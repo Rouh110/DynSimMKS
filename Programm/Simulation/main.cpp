@@ -47,7 +47,6 @@ void cleanup();
 #include "Simulation/SimMath.h"
 #include "Simulation/Cube.h";
 #include "Simulation/SimulationManager.h";
-#include "Simulation/TestClass.h"
 
 // main 
 int main( int argc, char **argv )

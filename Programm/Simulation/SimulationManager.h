@@ -1,6 +1,11 @@
 #pragma once
 #include "ObjectManager.h";
 #include "Simulation.h"
+
+/*
+Singelton.
+Used to give access to several classes for the simulation.
+*/
 class SimulationManager
 {
 private:
@@ -8,6 +13,9 @@ private:
 	ObjectManager objManager;
 	Simulation simulation;
 public:
+	/*
+	Returns the Instance of the Simulation Manager
+	*/
 	static SimulationManager * getInstance();
 
 	ObjectManager & getObjectManager();

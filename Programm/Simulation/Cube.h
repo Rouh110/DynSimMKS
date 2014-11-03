@@ -1,7 +1,9 @@
 #pragma once
 
 #include "RigidBody.h"
-
+/*
+Represents a Cube as an RigidBody.
+*/
 class Cube : public RigidBody
 {
 protected:
@@ -18,6 +20,9 @@ public:
 	Real getDepth();
 
 protected:
+	/*
+	Calculates and sets the inertia tensor and inverted inertia Tesor form the current with height and depth
+	*/
 	void calculateTensor();
 };
 
