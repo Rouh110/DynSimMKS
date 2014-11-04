@@ -48,6 +48,28 @@ void cleanup();
 #include "Simulation/Cube.h";
 #include "Simulation/SimulationManager.h";
 
+void TW_CALL setApproximationCB(const void *value, void *clientData) {
+	int integration = *(const int *)(value);
+	switch (integration) {
+	case 0:
+		SimulationManager::getInstance()->getSimulation().setApproximationMethod(Simulation::EXPLICIT_EULER );
+		break;
+
+	case 1:
+		SimulationManager::getInstance()->getSimulation().setApproximationMethod(Simulation::RUNGE_KUTTA_4);
+		break;
+
+
+	default:
+		break;
+	}
+}
+
+void TW_CALL getApproximationCB(void *value, void *clientData) {
+	Simulation::ApproximationMethod method = SimulationManager::getInstance()->getSimulation().getApproximationMethod();
+	*(int *)(value) = int(method);
+}
+
 // main 
 int main( int argc, char **argv )
 {
@@ -58,6 +80,12 @@ int main( int argc, char **argv )
 	MiniGL::init (argc, argv, 1024, 768, 0, 0, "Simulation");
 	MiniGL::initLights ();
 	MiniGL::setClientIdleFunc (50, timeStep);		
+
+	// set tweakBar
+	TwEnumVal approximationEV[] = { { 0, "Explicit Euler" }, { 1, "Runge Kutta 4" } };
+	// Create a type for the enum shapeEV
+	TwType approximationType = TwDefineEnum("ApproximationType", approximationEV, 2);
+	TwAddVarCB(MiniGL::m_tweakBar, "Approximation Method", approximationType, setApproximationCB, getApproximationCB, NULL, "");
 
 	buildModel ();
 

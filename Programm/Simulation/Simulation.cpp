@@ -20,6 +20,11 @@ void Simulation::setApproximationMethod(ApproximationMethod method)
 	approximationMethod = method;
 }
 
+Simulation::ApproximationMethod Simulation::getApproximationMethod()
+{
+	return approximationMethod;
+}
+
 void Simulation::update(Real h)
 {
 	switch (approximationMethod)

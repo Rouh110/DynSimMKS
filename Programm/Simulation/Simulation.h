@@ -22,6 +22,7 @@ public:
 	Sets the Method that will be used for calculation the next step.
 	*/
 	void setApproximationMethod(ApproximationMethod method);
+	ApproximationMethod getApproximationMethod();
 
 	/*Updates the Simualtion*/
 	void update(Real h);
