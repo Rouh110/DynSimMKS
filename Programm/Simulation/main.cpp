@@ -137,6 +137,10 @@ void buildModel ()
 	Cube * cube = new Cube(1.0, 5.0, 1.0);
 	//cube->setRotation(Quaterniond(1,1,0.5,0).normalized());
 	SimulationManager::getInstance()->getObjectManager().addObject(cube);
+	Cube * cubetwo = new Cube(1.0, 5.0, 1.0);
+	cubetwo->setPosition(Vector3d(1, 1, 1));
+	//cube->setRotation(Quaterniond(1,1,0.5,0).normalized());
+	SimulationManager::getInstance()->getObjectManager().addObject(cubetwo);
 	//RigidBody * r = new RigidBody();	
 	//TestClass *p = new TestClass();
 	//TestClass test;
