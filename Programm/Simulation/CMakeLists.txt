@@ -23,6 +23,8 @@ ADD_EXECUTABLE(Simulation
 	  SimulationManager.h
 	  Sphere.cpp
 	  Sphere.h
+	  Spring.cpp
+	  Spring.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  

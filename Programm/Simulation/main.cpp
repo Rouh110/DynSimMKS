@@ -22,6 +22,7 @@
  */
 
 
+#include "Simulation/Spring.h"
 #include "Common/Config.h"
 #include "Visualization/MiniGL.h"
 #include "GL/glut.h"
@@ -138,6 +139,7 @@ void buildModel ()
 {
 	TimeManager::getCurrent ()->setTimeStepSize (0.01);
 	// Create simulation model
+
 	Cube * cube = new Cube(1.0, 5.0, 1.0);
 	//cube->setRotation(Quaterniond(1,1,0.5,0).normalized());
 	SimulationManager::getInstance()->getObjectManager().addObject(cube);
@@ -148,6 +150,10 @@ void buildModel ()
 	Sphere * sphere = new Sphere(2);
 	sphere->setPosition(Vector3d(1, 0, 3));
 	SimulationManager::getInstance()->getObjectManager().addObject(sphere);
+
+	Spring spring;
+	spring.setSuspensionPointA(Vector3d(1, 1, 0), cube);
+	spring.setSuspensionPointB(Vector3d(1, 1, 0), cube2);
 
 }
 
