@@ -149,7 +149,6 @@ void buildModel ()
 	sphere->setPosition(Vector3d(1, 0, 3));
 	SimulationManager::getInstance()->getObjectManager().addObject(sphere);
 
-	
 }
 
 double i = 0;
