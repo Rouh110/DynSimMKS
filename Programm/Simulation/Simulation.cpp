@@ -86,6 +86,7 @@ void Simulation::simulateExplicitEuler(Real h)
 	Eigen::Vector3d tempVector;
 	Eigen::Quaterniond tempQuaternion;
 
+
 	Real time = TimeManager::getCurrent()->getTime();
 
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
@@ -153,6 +154,7 @@ void Simulation::simulateRungeKutta4(Real h)
 	w.w() = 0;
 	Eigen::Vector3d angularVel;
 	Eigen::Quaterniond tempQuaternion;
+	Eigen::Quaterniond tempQuaternionW;
 	Eigen::Vector3d kvone;
 	Eigen::Vector3d kvtwo;
 	Eigen::Vector3d kvthree;
@@ -161,6 +163,16 @@ void Simulation::simulateRungeKutta4(Real h)
 	Eigen::Vector3d kxtwo;
 	Eigen::Vector3d kxthree;
 	Eigen::Vector3d kxfour;
+	Eigen::Vector3d kwone;
+	Eigen::Vector3d kwtwo;
+	Eigen::Vector3d kwthree;
+	Eigen::Vector3d kwfour;
+	Eigen::Quaterniond kqone;
+	Eigen::Quaterniond kqtwo;
+	Eigen::Quaterniond kqthree;
+	Eigen::Quaterniond kqfour;
+	Eigen::Quaterniond kuttaResult_Q;
+	Eigen::Vector3d kuttaResult_W;
 	Eigen::Vector3d kuttaResult_V;
 	Eigen::Vector3d kuttaResult_X;
 	Real time = TimeManager::getCurrent()->getTime();
@@ -203,19 +215,96 @@ void Simulation::simulateRungeKutta4(Real h)
 		rigidBody->setPosition(rigidBody->getPosition() + kuttaResult_X);
 
 		// calculate v
-
 		rigidBody->setVelocity(rigidBody->getVelocity() + kuttaResult_V);
 
 		// calculate q
-		calculateQdot(rigidBody, tempQuaternion);
-		scaleQuaternion(h, tempQuaternion, tempQuaternion);
+	//	calculateQdot(rigidBody, tempQuaternion);
+//		scaleQuaternion(h, tempQuaternion, tempQuaternion);
+//		addQuaternions(rigidBody->getRotation(), tempQuaternion, tempQuaternion);
+//		rigidBody->setRotation(tempQuaternion.normalized());
+
+		//w(t_0 + h) = w_0 + 1 / 6(k_w1 + 2 * k_w2 + 2 * k_w3 + k_w4)
+		//	k_w1 = h*(J^-1 (T_0 - w_0x(J*w_0)))
+		// k_w2 = h*(J^-1 (T(t_0 + h / 2) - (w_0 + 0.5*k_w1)x(J*(w_0 + 0.5*k_w1)))
+		// k_w3 = h*(J^-1 (T(t_0 + h / 2) - (w_0 + 0.5*k_w2)x(J*(w_0 + 0.5*k_w2))))
+		//k_w4 =  h*( J^-1 (T(t_0+h)-(w_0+k_w3)x(J*(w_0+k_w3))))
+		/*
+		[05.11.2014 23:15:33] Jan: k_q1 = h * 0.5 * w_0*q_0
+
+ Jan: k_q2 = h*0.5((w_0+0.5*k_w1)*(q_0+0.5*k_q1))
+[05.11.2014 23:20:30] Jan: k_q3 = h*0.5((w_0+0.5*k_w2)*(q_0+0.5*k_q2))
+[05.11.2014 23:21:01] Jan: k_q4 = h*0.5((w_0+k_w3)*(q_0+k_q3))
+		
+				*/
+		
+		Quaterniond wsnake(rigidBody->getTorque().x(), rigidBody->getTorque().y(), rigidBody->getTorque().z(), 0);
+		//____________________________________kwone________________________________________________________
+		multDiagonalMatrix2Vector(rigidBody->getInertiaTensor(), rigidBody->getAngulaVelocity(), tmp);
+		addVector3d(rigidBody->getTorque(), -1*(rigidBody->getAngulaVelocity().cross(tmp)), tmp);
+		multDiagonalMatrix2Vector(rigidBody->getInvertedInertiaTensor(), tmp, tmp);
+		kwone = h *  tmp;
+		//____________________________________kqone________________________________________________________
+		tempQuaternion = wsnake * rigidBody->getRotation();
+		scaleQuaternion(1/2 * h, tempQuaternion, kqone);
+		//____________________________________kwtwo__________________________________________________________
+		multDiagonalMatrix2Vector(rigidBody->getInertiaTensor(), (rigidBody->getAngulaVelocity() + 1 / 2 * kwone), tmp);
+		addVector3d(rigidBody->getTorque(), -1 * ((rigidBody->getAngulaVelocity() + 1 / 2 * kwone).cross(tmp)), tmp);
+		multDiagonalMatrix2Vector(rigidBody->getInvertedInertiaTensor(), tmp, tmp);
+		kwtwo = h * tmp;
+		//____________________________________kqtwo________________________________________________________
+		scaleQuaternion(1 / 2, kqone, tempQuaternion); 
 		addQuaternions(rigidBody->getRotation(), tempQuaternion, tempQuaternion);
-		rigidBody->setRotation(tempQuaternion.normalized());
-
-		// calcualte w
-	//	calculateWdot(rigidBody, time, tempVector);
-	//	rigidBody->setAngulaVelocity(rigidBody->getAngulaVelocity() + (h*tempVector));
-
+		tempQuaternionW.x() = kwone.x();
+		tempQuaternionW.y() = kwone.y();
+		tempQuaternionW.z() = kwone.z();
+		tempQuaternionW.w() = 0;
+		scaleQuaternion(1 / 2, tempQuaternionW, tempQuaternionW);
+		addQuaternions(wsnake, tempQuaternionW, tempQuaternionW);
+		scaleQuaternion(1 / 2 * h, tempQuaternion * tempQuaternionW, kqtwo);
+		//____________________________________kwthree________________________________________________________
+		multDiagonalMatrix2Vector(rigidBody->getInertiaTensor(), (rigidBody->getAngulaVelocity() + (1 / 2 * kwtwo)), tmp);
+		addVector3d(rigidBody->getTorque(), -1 * ((rigidBody->getAngulaVelocity() + 1 / 2 * kwtwo).cross(tmp)), tmp);
+		multDiagonalMatrix2Vector(rigidBody->getInvertedInertiaTensor(), tmp, tmp);
+		kwthree = h * tmp;
+		//____________________________________kqthree________________________________________________________
+		scaleQuaternion(1 / 2, kqtwo, tempQuaternion);
+		addQuaternions(rigidBody->getRotation(), tempQuaternion, tempQuaternion);
+		tempQuaternionW.x() = kwtwo.x();
+		tempQuaternionW.y() = kwtwo.y();
+		tempQuaternionW.z() = kwtwo.z();
+		tempQuaternionW.w() = 0;
+		scaleQuaternion(1 / 2, tempQuaternionW, tempQuaternionW);
+		addQuaternions(wsnake, tempQuaternionW, tempQuaternionW);
+		scaleQuaternion(1 / 2 * h, tempQuaternion * tempQuaternionW, kqthree);
+		//____________________________________kwfour________________________________________________________
+		multDiagonalMatrix2Vector(rigidBody->getInertiaTensor(), (rigidBody->getAngulaVelocity() + kwthree), tmp);
+		addVector3d(rigidBody->getTorque(), -1 * ((rigidBody->getAngulaVelocity() + kwthree).cross(tmp)), tmp);
+		multDiagonalMatrix2Vector(rigidBody->getInvertedInertiaTensor(), tmp, tmp);
+		kwfour = h * tmp;
+		//____________________________________kqfour________________________________________________________
+		addQuaternions(rigidBody->getRotation(), tempQuaternion, tempQuaternion);
+		tempQuaternionW.x() = kwthree.x();
+		tempQuaternionW.y() = kwthree.y();
+		tempQuaternionW.z() = kwthree.z();
+		tempQuaternionW.w() = 0;
+		addQuaternions(wsnake, tempQuaternionW, tempQuaternionW);
+		scaleQuaternion(1 / 2 * h, tempQuaternion * tempQuaternionW, kqfour);
+		//____________________________________qresult________________________________________________________
+		scaleQuaternion(2, kqtwo, tempQuaternion);
+		addQuaternions(kqone, tempQuaternion, tempQuaternion);
+		scaleQuaternion(2, kqthree, tempQuaternionW);
+		addQuaternions(tempQuaternionW, kqfour, tempQuaternionW);
+		addQuaternions(tempQuaternion, tempQuaternionW, tempQuaternion);
+		scaleQuaternion(1 / 6, tempQuaternion, tempQuaternion);
+		addQuaternions(rigidBody->getRotation(), tempQuaternion, kuttaResult_Q);
+		rigidBody->setRotation(kuttaResult_Q);
+		//____________________________________wresult________________________________________________________
+		addVector3d(kwone, (2 * kwtwo), tmp);
+		addVector3d((2 * kwthree), kwfour, tmp2);
+		addVector3d(tmp, tmp2, tmp3);
+		tmp3 = 1 / 6 * tmp3;
+		addVector3d(tmp3, rigidBody->getAngulaVelocity(), kuttaResult_W);
+		rigidBody->setAngulaVelocity(kuttaResult_W);
 	}
 
 
