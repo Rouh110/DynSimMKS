@@ -179,7 +179,7 @@ void MiniGL::drawVector (const Real x1, const Real y1, const Real z1, const Real
 /** Zeichnet eine Kugel an der Stelle translation mit dem übergebenen Radius
 * und in der übergebenen Farbe.
 */
-void MiniGL::drawSphere (Vector3d *translation, float radius, float *color, const unsigned int subDivision)
+void MiniGL::drawSphere (Vector3d *translation, float radius, const float *color, const unsigned int subDivision)
 {
 	float speccolor [4] = {1.0, 1.0, 1.0, 1.0};
 	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT, color);

@@ -21,6 +21,8 @@ ADD_EXECUTABLE(Simulation
 	  Simulation.h
 	  SimulationManager.cpp
 	  SimulationManager.h
+	  Sphere.cpp
+	  Sphere.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  

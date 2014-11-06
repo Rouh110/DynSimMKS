@@ -1,5 +1,5 @@
 #pragma once
-#include "ObjectManager.h";
+#include "ObjectManager.h"
 #include "Simulation.h"
 
 /*

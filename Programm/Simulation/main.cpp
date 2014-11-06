@@ -30,6 +30,12 @@
 #include "Common/timing.h"
 #include <Eigen/Dense>
 
+#include "Simulation/SimMath.h"
+#include "Simulation/Cube.h"
+#include "Simulation/Sphere.h"
+#include "Simulation/SimulationManager.h"
+
+
 // Enable memory leak detection
 #ifdef _DEBUG
 	#define new DEBUG_NEW 
@@ -44,9 +50,7 @@ void buildModel ();
 void render ();
 void cleanup();
 
-#include "Simulation/SimMath.h"
-#include "Simulation/Cube.h";
-#include "Simulation/SimulationManager.h";
+
 
 void TW_CALL setApproximationCB(const void *value, void *clientData) {
 	int integration = *(const int *)(value);
@@ -137,10 +141,13 @@ void buildModel ()
 	Cube * cube = new Cube(1.0, 5.0, 1.0);
 	//cube->setRotation(Quaterniond(1,1,0.5,0).normalized());
 	SimulationManager::getInstance()->getObjectManager().addObject(cube);
-	//RigidBody * r = new RigidBody();	
-	//TestClass *p = new TestClass();
-	//TestClass test;
-	//delete test;
+	Cube * cube2 = new Cube(1.0, 2.0, 1.0);
+	cube2->setPosition(Vector3d(1,2,3));
+	SimulationManager::getInstance()->getObjectManager().addObject(cube2);
+	
+	Sphere * sphere = new Sphere(2);
+	sphere->setPosition(Vector3d(1, 0, 3));
+	SimulationManager::getInstance()->getObjectManager().addObject(sphere);
 
 	
 }
@@ -154,14 +161,33 @@ void render ()
 
 	Vector3d pos;	
 	Cube *c;
+	Sphere *s;
 
+	
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
-		c = (Cube*)rigidBody;
-		pos = c->getPosition();
-		//c->setRotation(q);
-		//c->setPosition(Vector3d(i,0,0));
-		MiniGL::drawCube(&pos, &(c->getRotation().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
+		c = dynamic_cast<Cube*>(rigidBody);
+		//c = (Cube*)(rigidBody);
+		if (c != 0)
+		{
+			pos = c->getPosition();
+			//c->setRotation(q);
+			//c->setPosition(Vector3d(i,0,0));
+			MiniGL::drawCube(&pos, &(c->getRotation().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
+		}
+		else
+		{
+			s = dynamic_cast<Sphere*>(rigidBody);
+			
+			if (s != 0)
+			{
+				
+				pos = s->getPosition();
+			
+				MiniGL::drawSphere(&pos, s->getRadius(), MiniGL::red);
+			}
+
+		}
 	}
 
 	MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());

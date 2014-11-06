@@ -1,6 +1,6 @@
 #pragma once
-#include "RigidBody.h";
-#include <vector>;
+#include "RigidBody.h"
+#include <vector>
 
 /*
 Manage the Objects created in the Simualtion.

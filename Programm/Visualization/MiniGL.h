@@ -151,7 +151,7 @@ namespace IBDS
 		static void coordinateSystem ();
 		static void drawVector (const Eigen::Vector3d &a, const Eigen::Vector3d &b, const float w, float *color);
 		static void drawVector (const Real x1, const Real y1, const Real z1, const Real x2, const Real y2, const Real z2, const float w, float *color);
-		static void drawSphere (Eigen::Vector3d *translation, float radius, float *color, const unsigned int subDivision =  16);
+		static void drawSphere (Eigen::Vector3d *translation, float radius, const float *color, const unsigned int subDivision =  16);
 		static void drawQuad (const Eigen::Vector3d &a, const Eigen::Vector3d &b, const Eigen::Vector3d &c, const Eigen::Vector3d &d, const Eigen::Vector3d &norm, float *color);
 		static void drawTetrahedron(const Eigen::Vector3d &a, const Eigen::Vector3d &b, const Eigen::Vector3d &c, const Eigen::Vector3d &d, float *color);
 		static void drawTriangle (const Eigen::Vector3d &a, const Eigen::Vector3d &b, const Eigen::Vector3d &c, const Eigen::Vector3d &norm, float *color);

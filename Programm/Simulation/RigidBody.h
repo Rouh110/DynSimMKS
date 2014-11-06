@@ -59,5 +59,8 @@ public:
 	void resetForces();
 	void setRotation(const Eigen::Quaterniond & rotation);
 
+protected:
+	virtual void calculateTensor() = 0;
+
 };
 
