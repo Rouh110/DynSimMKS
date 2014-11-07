@@ -24,5 +24,7 @@ protected:
 	Calculates and sets the inertia tensor and inverted inertia Tesor form the current with height and depth
 	*/
 	void calculateTensor();
+public:
+	static Cube & Cube::create(Real width = 1, Real height = 1, Real depth = 1);
 };
 

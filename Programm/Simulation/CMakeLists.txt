@@ -12,6 +12,7 @@ ADD_EXECUTABLE(Simulation
 	  TimeManager.h
 	  Cube.cpp
 	  Cube.h
+	  IForce.cpp
 	  IForce.h
 	  ObjectManager.cpp
 	  ObjectManager.h
@@ -25,6 +26,16 @@ ADD_EXECUTABLE(Simulation
 	  Sphere.h
 	  Spring.cpp
 	  Spring.h
+	  GlobalForce.cpp
+	  GlobalForce.h
+	  Gravity.cpp
+	  Gravity.h
+	  IScene.cpp
+	  IScene.h
+	  TestScene01.cpp
+	  TestScene01.h
+	  TestScene02.cpp
+	  TestScene02.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  

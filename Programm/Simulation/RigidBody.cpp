@@ -1,5 +1,6 @@
 #include "RigidBody.h"
 #include "Simulation/SimMath.h"
+#include "SimulationManager.h"
 
 using namespace IBDS;
 
@@ -31,14 +32,16 @@ Real RigidBody::getMass() const
 {
 	return mass;
 }
-const Eigen::Vector3d& RigidBody::getInertiaTensor() const
+
+void RigidBody::getInertiaTensor(Eigen::Matrix3d &out_Tensor) const
 {
-	return inertiaTensor;
+	out_Tensor = rotation.toRotationMatrix()*(inertiaTensor.asDiagonal()* rotation.toRotationMatrix().transpose());
 }
-const Eigen::Vector3d& RigidBody::getInvertedInertiaTensor() const
+void RigidBody::getInvertedInertiaTensor(Eigen::Matrix3d &out_InvertedTensor) const
 {
-	return invertedInertiaTensor;
+	out_InvertedTensor = rotation.toRotationMatrix()*(invertedInertiaTensor.asDiagonal()* rotation.toRotationMatrix().transpose());
 }
+
 const Eigen::Vector3d& RigidBody::getPosition() const
 {
 	return position;
@@ -98,11 +101,24 @@ void RigidBody::setRotation(const Eigen::Quaterniond & rotation)
 
 void RigidBody::addForceAtGlobalPosition(const Eigen::Vector3d &force, const Eigen::Vector3d &position)
 {
-	addForce(force, (position - this->position));
+	//out_position = rigidBodyB->getRotation()._transformVector(suspensionPointB) + rigidBodyB->getPosition();
+	Vector3d localPos = (position - this->position);
+	localPos = getRotation().inverse()._transformVector(localPos);
+	addForce(force, localPos);
 }
 
 void RigidBody::addForce(const Eigen::Vector3d &force, const Eigen::Vector3d &localposition)
 {
-	torque += (localposition).cross(force);
+	torque += localposition.cross(force);
 	addForce(force);
+}
+
+void RigidBody::addTorqe(const Eigen::Vector3d & torque)
+{
+	this->torque += torque;
+}
+
+void RigidBody::addToObjectManager()
+{
+	SimulationManager::getInstance()->getObjectManager().addObject(this);
 }

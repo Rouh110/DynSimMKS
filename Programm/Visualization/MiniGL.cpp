@@ -139,7 +139,7 @@ void MiniGL::coordinateSystem()
 
 /** Zeichnet eine Linie von a nach b mit der Dicke w und der Farbe farbe.
   */
-void MiniGL::drawVector (const Vector3d &a, const Vector3d &b, const float w, float *color)
+void MiniGL::drawVector (const Vector3d &a, const Vector3d &b, const float w, const float *color)
 {
 	float speccolor [4] = {1.0, 1.0, 1.0, 1.0};
 	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT, color);
@@ -160,7 +160,7 @@ void MiniGL::drawVector (const Vector3d &a, const Vector3d &b, const float w, fl
 
 /** Zeichnet eine Linie von (x1,y1,z1) nach (x2,y2,z2) mit der Dicke w und der Farbe farbe.
   */
-void MiniGL::drawVector (const Real x1, const Real y1, const Real z1, const Real x2, const Real y2, const Real z2, const float w, float *color)
+void MiniGL::drawVector (const Real x1, const Real y1, const Real z1, const Real x2, const Real y2, const Real z2, const float w, const float *color)
 {
 	float speccolor [4] = {1.0, 1.0, 1.0, 1.0};
 	glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT, color);

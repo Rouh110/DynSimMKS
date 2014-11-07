@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Simulation/RigidBody.h"
+#include "Simulation\IForce.h"
+
 using namespace Eigen;
 
-class Spring
+class Spring :  public IForce
 {
 private:
 	RigidBody *rigidBodyA;
@@ -28,10 +30,17 @@ public:
 
 	void setSuspensionPointA(const Vector3d & localPosition, RigidBody * rigidBody);
 	void setSuspensionPointB(const Vector3d & localPosition, RigidBody * rigidBody);
-	void addForces(Real time);
 
-	void calculateForces(const Vector3d & globalPositionA, const Vector3d & velocityA, const Vector3d & globalPositionB, const Vector3d & velocityB, Vector3d out_forceA, Vector3d out_forceB) const;
+	void setSuspensionPoints(const Vector3d & localPositionA, RigidBody * rigidBodyA, const Vector3d & localPositionB, RigidBody * rigidBodyB, bool setLength = true);
 
+	void computeForce(Real time);
+
+	void calculateForces(const Vector3d & globalPositionA, const Vector3d & velocityA, const Vector3d & globalPositionB, const Vector3d & velocityB, Vector3d & out_forceA, Vector3d & out_forceB) const;
+
+	static Spring & create();
+	static Spring & create(Real damper, Real springConst, Real springLength);
+
+	void render();
 protected:
 	void getGlobalPositionA(Vector3d & out_position) const;
 	void getGlobalPositionB(Vector3d & out_position) const;

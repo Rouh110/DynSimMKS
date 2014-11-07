@@ -27,8 +27,10 @@ public:
 	bool isStatic() const;
 
 	Real getMass() const;
-	const Eigen::Vector3d& getInertiaTensor() const;
-	const Eigen::Vector3d& getInvertedInertiaTensor() const;
+
+	void getInertiaTensor(Eigen::Matrix3d &out_Tensor) const;
+	void getInvertedInertiaTensor(Eigen::Matrix3d & out_InvertedTensor) const;
+
 	const Eigen::Vector3d& getPosition() const;
 	const Eigen::Vector3d& getVelocity() const;
 	const Eigen::Vector3d& getAngulaVelocity()const;
@@ -52,6 +54,7 @@ public:
 	*/
 	void addForce(const Eigen::Vector3d &force, const Eigen::Vector3d &position);
 	void addForce(const Eigen::Vector3d &force);
+	void addTorqe(const Eigen::Vector3d & torque);
 
 	/*
 	Resets the fores to zero.
@@ -59,7 +62,10 @@ public:
 	void resetForces();
 	void setRotation(const Eigen::Quaterniond & rotation);
 
+	
+
 protected:
+	void addToObjectManager();
 	virtual void calculateTensor() = 0;
 
 };

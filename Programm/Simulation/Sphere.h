@@ -13,7 +13,7 @@ public:
 
 	Real getRadius() const;
 
-	void mach();
+	static Sphere & create(Real radius = 1);
 protected:
 	void calculateTensor();
 };

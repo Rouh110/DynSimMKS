@@ -35,6 +35,8 @@
 #include "Simulation/Cube.h"
 #include "Simulation/Sphere.h"
 #include "Simulation/SimulationManager.h"
+#include "TestScene01.h"
+#include "TestScene02.h"
 
 
 // Enable memory leak detection
@@ -117,17 +119,6 @@ void timeStep ()
 	TimeManager *tm = TimeManager::getCurrent ();
 	const Real h = tm->getTimeStepSize();
 
-	// Simulation code
-
-	//add globalForces
-
-	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
-	{
-		Vector3d force(0.1,0,0);
-		rigidBody->addForce(force, Vector3d(0,1,1));
-		rigidBody->addForce(force*-1);
-	}
-
 	//update Simulation
 	SimulationManager::getInstance()->getSimulation().update(h);
 	tm->setTime(tm->getTime() + h);
@@ -139,21 +130,11 @@ void buildModel ()
 {
 	TimeManager::getCurrent ()->setTimeStepSize (0.01);
 	// Create simulation model
-
-	Cube * cube = new Cube(1.0, 5.0, 1.0);
-	//cube->setRotation(Quaterniond(1,1,0.5,0).normalized());
-	SimulationManager::getInstance()->getObjectManager().addObject(cube);
-	Cube * cube2 = new Cube(1.0, 2.0, 1.0);
-	cube2->setPosition(Vector3d(1,2,3));
-	SimulationManager::getInstance()->getObjectManager().addObject(cube2);
 	
-	Sphere * sphere = new Sphere(2);
-	sphere->setPosition(Vector3d(1, 0, 3));
-	SimulationManager::getInstance()->getObjectManager().addObject(sphere);
-
-	Spring spring;
-	spring.setSuspensionPointA(Vector3d(1, 1, 0), cube);
-	spring.setSuspensionPointB(Vector3d(1, 1, 0), cube2);
+	//TestScene01 scene;
+	//scene.initializeScene();
+	TestScene02 scene2;
+	scene2.initializeScene();
 
 }
 
@@ -178,7 +159,7 @@ void render ()
 			pos = c->getPosition();
 			//c->setRotation(q);
 			//c->setPosition(Vector3d(i,0,0));
-			MiniGL::drawCube(&pos, &(c->getRotation().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
+			MiniGL::drawCube(&pos, &(c->getRotation().inverse().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
 		}
 		else
 		{
@@ -194,7 +175,11 @@ void render ()
 
 		}
 	}
-
+	
+	for each (IForce  *  force in SimulationManager::getInstance()->getObjectManager().getForces())
+	{
+		force->render();
+	}
 	MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());
 
 }

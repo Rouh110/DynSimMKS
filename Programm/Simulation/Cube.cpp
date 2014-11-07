@@ -34,12 +34,27 @@ Real Cube::getDepth()
 
 void Cube::calculateTensor()
 {
-	inertiaTensor.x() = (height*height + depth*depth) / 12;
-	inertiaTensor.y() = (width*width + depth*depth) / 12;
-	inertiaTensor.z() = (width*width + height*height) / 12;
+	Real sqrHeight = height*height;
+	Real sqrWidth =  width*width;
+	Real sqrDepth = depth*depth;
+	Real m11 = (sqrHeight + sqrDepth) / 12;
+	Real m22 = (sqrWidth + sqrDepth) / 12;
+	Real m33 = (sqrHeight + sqrWidth) / 12;
 
-	invertedInertiaTensor.x() = 1/inertiaTensor.x();
-	invertedInertiaTensor.y() = 1 / inertiaTensor.y();
-	invertedInertiaTensor.z() = 1 / inertiaTensor.z();
+	inertiaTensor.x() = m11;
+	inertiaTensor.y() = m22;
+	inertiaTensor.z() = m33;
+	
+	invertedInertiaTensor.x() = 1/m11;
+	invertedInertiaTensor.y() = 1/m22;
+	invertedInertiaTensor.z() = 1/m33;
+	
 
+}
+
+Cube & Cube::create(Real width , Real height , Real depth )
+{
+	Cube * cube = new Cube(width, height, depth);
+	cube->addToObjectManager();
+	return *cube;
 }
