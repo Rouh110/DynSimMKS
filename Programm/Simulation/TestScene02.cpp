@@ -82,10 +82,10 @@ void TestScene02::initializeScene()
 	spring8.setSuspensionPoints(Vector3d(0, -0.5, 0), &leftArm, Vector3d(0, 0.5, 0), &leftUnderArm);
 
 	Spring & spring9 = Spring::create(damper, springConstant, 1);
-	spring9.setSuspensionPoints(Vector3d(0.3, -0.5, 0), &torso, Vector3d(0, 0.5, 0), &rightUpperLeg);
+	spring9.setSuspensionPoints(Vector3d(0.3, -1, 0), &torso, Vector3d(0, 0.5, 0), &rightUpperLeg);
 
 	Spring & spring10 = Spring::create(damper, springConstant, 1);
-	spring10.setSuspensionPoints(Vector3d(-0.3, -0.5, 0), &torso, Vector3d(0, 0.5, 0), &leftUpperLeg);
+	spring10.setSuspensionPoints(Vector3d(-0.3, -1, 0), &torso, Vector3d(0, 0.5, 0), &leftUpperLeg);
 
 	Spring & spring11 = Spring::create(damper, springConstant, 1);
 	spring11.setSuspensionPoints(Vector3d(0.0, -0.5, 0), &rightUpperLeg, Vector3d(0, 0.5, 0), &rightShin);

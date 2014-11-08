@@ -75,11 +75,17 @@ void Spring::computeForce(Real time)
 
 	calculateForces(globalPositionA, rigidBodyA->getVelocity(), globalPositionB, rigidBodyB->getVelocity(), forceA, forceB);
 
-	rigidBodyA->addForce(forceA);
-	rigidBodyA->addTorqe((globalPositionA - rigidBodyA->getPosition()).cross(forceA));
+	//rigidBodyA->addForce(forceA);
+	//rigidBodyA->addTorqe((globalPositionA - rigidBodyA->getPosition()).cross(forceA));
+	
+	//rigidBodyB->addForce(forceB);
+	//rigidBodyB->addTorqe((globalPositionB-rigidBodyB->getPosition()).cross(forceB));
+
+	//rigidBodyA->addForce(forceA, suspensionPointA);
 	//rigidBodyB->addForce(forceB, suspensionPointB);
-	rigidBodyB->addForce(forceB);
-	rigidBodyB->addTorqe((globalPositionB-rigidBodyB->getPosition()).cross(forceB));
+
+	rigidBodyA->addForceAtGlobalPosition(forceA, globalPositionA);
+	rigidBodyB->addForceAtGlobalPosition(forceB, globalPositionB);
 
 	//printf("pointA")
 	

@@ -293,7 +293,7 @@ void Simulation::simulateRungeKutta4(Real h)
 	//k4
 	computeAllForces(time + h);
 	i = 0;
-	Real factor = 0.1666666666;
+	Real factor = 1.0/6.0;
 	
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{

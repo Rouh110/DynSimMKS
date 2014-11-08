@@ -101,15 +101,13 @@ void RigidBody::setRotation(const Eigen::Quaterniond & rotation)
 
 void RigidBody::addForceAtGlobalPosition(const Eigen::Vector3d &force, const Eigen::Vector3d &position)
 {
-	//out_position = rigidBodyB->getRotation()._transformVector(suspensionPointB) + rigidBodyB->getPosition();
-	Vector3d localPos = (position - this->position);
-	localPos = getRotation().inverse()._transformVector(localPos);
-	addForce(force, localPos);
+	torque += (position - this->position).cross(force);
+	addForce(force);
 }
 
 void RigidBody::addForce(const Eigen::Vector3d &force, const Eigen::Vector3d &localposition)
 {
-	torque += localposition.cross(force);
+	torque += localposition.cross(rotation.inverse()._transformVector(force));
 	addForce(force);
 }
 
