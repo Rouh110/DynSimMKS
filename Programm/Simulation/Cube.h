@@ -25,6 +25,9 @@ protected:
 	*/
 	void calculateTensor();
 public:
+
+	/*Creates a Cuboit with the given Prameter and adds it to the ObjectManager.
+	Returns a Referenze to the created Cuboit.*/
 	static Cube & Cube::create(Real width = 1, Real height = 1, Real depth = 1);
 };
 

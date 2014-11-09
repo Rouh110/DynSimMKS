@@ -18,7 +18,7 @@ public:
 	~ObjectManager();
 	/*
 	Adds an Object to the ObjectManager
-	Don't add an Objetc, while using the lists.
+	Don't add an Object, while using the lists.
 	*/
 	void addObject(RigidBody *rigidBody);
 	void addObject(IForce *force);

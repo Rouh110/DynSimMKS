@@ -18,12 +18,17 @@ public:
 	*/
 	static SimulationManager * getInstance();
 
+	/*Returns the ObjectManger */
 	ObjectManager & getObjectManager();
+
+	/*Returns the Simulator*/
 	Simulation & getSimulation();
 
 	~SimulationManager();
 private:
+	/*private constructor to prevent uncontrolled instanciation of the singelton*/
 	SimulationManager();
+	/*Empty copy constructor to prevent the duplication of the singelton*/
 	SimulationManager(SimulationManager&);
 	
 };

@@ -42,30 +42,41 @@ public:
 	Sets the mass. The Rigidbody will be static if the mass is 0.
 	*/
 	void setMass(Real mass);
+	/*Sets the position of the RigidBody*/
 	void setPosition(const Eigen::Vector3d &position);
+	/*Sets the velocity of the rigidbody*/
 	void setVelocity(const Eigen::Vector3d &velocity);
+	/*Sets the angula velocity of the rigid body*/
 	void setAngulaVelocity(const Eigen::Vector3d &angulaVelocity);
 	/*
 	Adds an Force for the Rigidbody at the given position in global space.
 	*/
 	void addForceAtGlobalPosition(const Eigen::Vector3d &force, const Eigen::Vector3d &position);
 	/*
-	Adds an Force for the RigidBody at the given position in local space
+	Adds an Force for the RigidBody at the given position in local space.
+	The Force vector must be in global space.
 	*/
 	void addForce(const Eigen::Vector3d &force, const Eigen::Vector3d &position);
+
+	/*Adds a force to the RigidBody at the center of mass. So there will be no torque*/
 	void addForce(const Eigen::Vector3d &force);
+
+	/*Adds torque to the rigidbody*/
 	void addTorqe(const Eigen::Vector3d & torque);
 
 	/*
 	Resets the fores to zero.
 	*/
 	void resetForces();
+	/*Sets the rotation of the RigidBody. The Rotation must be normalized !!!!*/
 	void setRotation(const Eigen::Quaterniond & rotation);
 
 	
 
 protected:
+	/*adds the RigidBody to the ObjectManager*/
 	void addToObjectManager();
+	/*Calulates and sets the inertiaTensor and the inverted inertia tensor of the RigidBody. */
 	virtual void calculateTensor() = 0;
 
 };

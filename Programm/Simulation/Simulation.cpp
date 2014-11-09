@@ -102,7 +102,7 @@ void Simulation::simulateExplicitEuler(Real h)
 		rigidBody->setPosition(rigidBody->getPosition() + h* tempVector);
 
 		// calculate v
-		calculateVdot(rigidBody, time, tempVector);
+		calculateVdot(rigidBody, tempVector);
 		rigidBody->setVelocity(rigidBody->getVelocity() + (h*tempVector));
 
 		// calculate q
@@ -113,7 +113,7 @@ void Simulation::simulateExplicitEuler(Real h)
 		rigidBody->setRotation(tempQuaternion.normalized());
 
 		// calcualte w
-		calculateWdot(rigidBody, time, tempVector);
+		calculateWdot(rigidBody, tempVector);
 		rigidBody->setAngulaVelocity(rigidBody->getAngulaVelocity() + (h*tempVector));
 		
 	}
@@ -172,9 +172,9 @@ void Simulation::simulateRungeKutta4(Real h)
 			continue;
 
 		calculateXdot(rigidBody, xdot);
-		calculateVdot(rigidBody, time, vdot);
+		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
-		calculateWdot(rigidBody, time, wdot);
+		calculateWdot(rigidBody, wdot);
 
 		tmpState.position = h*xdot;
 		tmpState.velocity = h*vdot;
@@ -207,9 +207,9 @@ void Simulation::simulateRungeKutta4(Real h)
 			continue;
 
 		calculateXdot(rigidBody, xdot);
-		calculateVdot(rigidBody, time, vdot);
+		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
-		calculateWdot(rigidBody, time, wdot);
+		calculateWdot(rigidBody, wdot);
 
 		lastResult = results[i];
 		tmpState.position = h*xdot;
@@ -251,9 +251,9 @@ void Simulation::simulateRungeKutta4(Real h)
 			continue;
 
 		calculateXdot(rigidBody, xdot);
-		calculateVdot(rigidBody, time, vdot);
+		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
-		calculateWdot(rigidBody, time, wdot);
+		calculateWdot(rigidBody, wdot);
 
 		lastResult = results[i];
 		tmpState.position = h*xdot;
@@ -301,9 +301,9 @@ void Simulation::simulateRungeKutta4(Real h)
 			continue;
 
 		calculateXdot(rigidBody, xdot);
-		calculateVdot(rigidBody, time, vdot);
+		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
-		calculateWdot(rigidBody, time, wdot);
+		calculateWdot(rigidBody, wdot);
 
 		lastResult = results[i];
 		tmpState.position = h*xdot;
@@ -352,7 +352,7 @@ void Simulation::calculateXdot(const Vector3d & velocity, Vector3d & result) con
 	result = velocity;
 }
 
-void Simulation::calculateVdot(const RigidBody *rigidBody, Real time,  Vector3d & result) const
+void Simulation::calculateVdot(const RigidBody *rigidBody,  Vector3d & result) const
 {
 	calculateVdot(rigidBody->getMass(), rigidBody->getForce(), result);
 }
@@ -378,7 +378,7 @@ void Simulation::calculateQdot(const Quaterniond &q, const Vector3d & angularVel
 	scaleQuaternion(0.5, result, result);
 }
 
-void Simulation::calculateWdot(const RigidBody * rigidBody, Real time, Vector3d & result) const
+void Simulation::calculateWdot(const RigidBody * rigidBody, Vector3d & result) const
 {
 	Matrix3d inertiaTensor;
 	Matrix3d invertedInertiaTensor;

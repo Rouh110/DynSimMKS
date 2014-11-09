@@ -22,6 +22,8 @@ public:
 	Sets the Method that will be used for calculation the next step.
 	*/
 	void setApproximationMethod(ApproximationMethod method);
+
+	/*Returns the Approximation method currently used, to compute the Forces.*/
 	ApproximationMethod getApproximationMethod();
 
 	/*Updates the Simualtion*/
@@ -52,7 +54,7 @@ protected:
 	/*
 	Calculate the derivation of the velocity.
 	*/
-	inline void calculateVdot(const RigidBody * rigidBody, Real time, Vector3d & result) const;
+	inline void calculateVdot(const RigidBody * rigidBody, Vector3d & result) const;
 	inline void calculateVdot(Real mass, const Vector3d & force, Vector3d & result) const;
 
 	/*
@@ -64,9 +66,11 @@ protected:
 	/*
 	Calculate the derivation of the Angular velocity.
 	*/
-	inline void calculateWdot(const RigidBody * rigidBody, Real time, Vector3d & result) const;
+	inline void calculateWdot(const RigidBody * rigidBody, Vector3d & result) const;
 	inline void calculateWdot(const Vector3d & angularVelocity, const Matrix3d & inertiaTensor, const Matrix3d & invertedInertiaTensor, const Vector3d & torque, Vector3d & result) const;
 
+
+	/*Computes every force currenty in the scene*/
 	void computeAllForces(Real time);
 
 };

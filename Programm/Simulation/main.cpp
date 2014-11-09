@@ -129,6 +129,8 @@ void timeStep ()
 void buildModel ()
 {
 	TimeManager::getCurrent ()->setTimeStepSize (0.01);
+
+	//SimulationManager::getInstance()->getSimulation().setApproximationMethod(Simulation::RUNGE_KUTTA_4);
 	// Create simulation model
 	
 	//TestScene01 scene;
