@@ -130,30 +130,15 @@ struct State
 	Quaterniond rotation;
 
 };
+
 void Simulation::simulateRungeKutta4(Real h)
 {
 
-	std::vector<State> initialStates;
+	std::vector<State*> initialStates;
+	std::vector<State*> results;
 
-	std::vector<State> results;
 	Real time = TimeManager::getCurrent()->getTime();
-	// set up initialStates and results
-	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
-	{
-		if (rigidBody->isStatic())
-			continue;
 
-		State state;
-
-		state.position = rigidBody->getPosition();
-		state.velocity = rigidBody->getVelocity();
-		state.angularVelocity = rigidBody->getAngulaVelocity();
-		state.rotation = rigidBody->getRotation();
-		initialStates.push_back(state);
-
-		results.push_back(State());
-	}
-	
 	//k1
 	
 
@@ -163,7 +148,9 @@ void Simulation::simulateRungeKutta4(Real h)
 	Quaterniond qdot;
 
 	State tmpState;
-	State initialState;
+	State *initialState;
+	State *resultState;
+
 	int i = 0;
 	computeAllForces(time);
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
@@ -171,71 +158,88 @@ void Simulation::simulateRungeKutta4(Real h)
 		if (rigidBody->isStatic())
 			continue;
 
+		//Initialze the States and result
+
+		State *initialState = new State();
+
+		initialState->position = rigidBody->getPosition();
+		initialState->velocity = rigidBody->getVelocity();
+		initialState->angularVelocity = rigidBody->getAngulaVelocity();
+		initialState->rotation = rigidBody->getRotation();
+		initialStates.push_back(initialState);
+
+		resultState = new State();
+		results.push_back(resultState);
+
+
+		// calculates the derivatives
 		calculateXdot(rigidBody, xdot);
 		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
 		calculateWdot(rigidBody, wdot);
 
-		tmpState.position = h*xdot;
-		tmpState.velocity = h*vdot;
+		// set result = k_1
+		resultState->position = h*xdot;
+		resultState->velocity = h*vdot;
 		scaleQuaternion(h,qdot,qdot);
-		tmpState.rotation = qdot;
-		tmpState.angularVelocity = h*wdot;
-		results[i] = tmpState;
-
-		initialState = initialStates[i];
-		rigidBody->setPosition((initialState.position + 0.5 *tmpState.position));
-		rigidBody->setVelocity((initialState.velocity + 0.5 *tmpState.velocity));
+		resultState->rotation = qdot;
+		resultState->angularVelocity = h*wdot;
+		
+		
+		//setting up the rigidbody for next calculation
+		rigidBody->setPosition((initialState->position + 0.5 * resultState->position));
+		rigidBody->setVelocity((initialState->velocity + 0.5 * resultState->velocity));
 		scaleQuaternion(0.5, qdot, qdot);
-		addQuaternions(initialState.rotation, qdot, qdot);
+		addQuaternions(initialState->rotation, qdot, qdot);
 		rigidBody->setRotation(qdot.normalized());
-		rigidBody->setAngulaVelocity((initialState.angularVelocity + 0.5 *tmpState.angularVelocity));
+		rigidBody->setAngulaVelocity((initialState->angularVelocity + 0.5 * resultState->angularVelocity));
+
 		rigidBody->resetForces();
 		i++;
 
 	}
 	
-	
-	i = 0;
-	//k2
-	computeAllForces(time+0.5*h);
 
-	State lastResult;
+	//k2
+	i = 0;
+	computeAllForces(time+0.5*h);
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
 		if (rigidBody->isStatic())
 			continue;
 
+		// calculates the derivatives
 		calculateXdot(rigidBody, xdot);
 		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
 		calculateWdot(rigidBody, wdot);
 
-		lastResult = results[i];
+		// calculate k_2
 		tmpState.position = h*xdot;
 		tmpState.velocity = h*vdot;
 		scaleQuaternion(h, qdot, qdot);
 		tmpState.rotation = qdot;
 		tmpState.angularVelocity = h*wdot;
 
-		
-		
+		//setting up the rigidbody for next calculation
 		initialState = initialStates[i];
-		rigidBody->setPosition((initialState.position + 0.5 *tmpState.position));
-		rigidBody->setVelocity((initialState.velocity + 0.5 *tmpState.velocity));
+		rigidBody->setPosition((initialState->position + 0.5 * tmpState.position));
+		rigidBody->setVelocity((initialState->velocity + 0.5 * tmpState.velocity));
 		scaleQuaternion(0.5, qdot, qdot);
-		addQuaternions(initialState.rotation, qdot, qdot);
+		addQuaternions(initialState->rotation, qdot, qdot);
 		rigidBody->setRotation(qdot.normalized());
-		rigidBody->setAngulaVelocity((initialState.angularVelocity + 0.5 *tmpState.angularVelocity));
+		rigidBody->setAngulaVelocity((initialState->angularVelocity + 0.5 * tmpState.angularVelocity));
 		rigidBody->resetForces();
 
-		tmpState.position = lastResult.position + (tmpState.position * 2);
-		tmpState.velocity = lastResult.velocity + (tmpState.velocity * 2);
+		// calculates result= k_1 + 2* k_2
+		resultState = results[i];
+		resultState->position += (tmpState.position * 2);
+		resultState->velocity += (tmpState.velocity * 2);
 		scaleQuaternion(2, tmpState.rotation, qdot);
-		addQuaternions(lastResult.rotation, qdot, qdot);
-		tmpState.rotation = qdot;
-		tmpState.angularVelocity = lastResult.angularVelocity + (tmpState.angularVelocity * 2);
-		results[i] = tmpState;
+		addQuaternions(resultState->rotation, qdot, qdot);
+		resultState->rotation = qdot;
+		resultState->angularVelocity += (tmpState.angularVelocity * 2);
+		
 		
 		rigidBody->resetForces();
 		i++;
@@ -250,39 +254,37 @@ void Simulation::simulateRungeKutta4(Real h)
 		if (rigidBody->isStatic())
 			continue;
 
+		// calculates the derivatives
 		calculateXdot(rigidBody, xdot);
 		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
 		calculateWdot(rigidBody, wdot);
 
-		lastResult = results[i];
+		// calculate k_3
 		tmpState.position = h*xdot;
 		tmpState.velocity = h*vdot;
 		scaleQuaternion(h, qdot, qdot);
 		tmpState.rotation = qdot;
 		tmpState.angularVelocity = h*wdot;
 
+		//setting up the rigidbody for next calculation
 		initialState = initialStates[i];
-		rigidBody->setPosition((initialState.position + tmpState.position));
-		rigidBody->setVelocity((initialState.velocity + tmpState.velocity));
-		scaleQuaternion(1, qdot, qdot);
-		addQuaternions(initialState.rotation, qdot, qdot);
+		rigidBody->setPosition((initialState->position + tmpState.position));
+		rigidBody->setVelocity((initialState->velocity + tmpState.velocity));
+		//scaleQuaternion(1, qdot, qdot);
+		addQuaternions(initialState->rotation, qdot, qdot);
 		rigidBody->setRotation(qdot.normalized());
-		rigidBody->setAngulaVelocity((initialState.angularVelocity + tmpState.angularVelocity));
+		rigidBody->setAngulaVelocity((initialState->angularVelocity + tmpState.angularVelocity));
 		rigidBody->resetForces();
 
-
-		tmpState.position = lastResult.position + (tmpState.position * 2);
-
-		tmpState.velocity = lastResult.velocity + (tmpState.velocity * 2);
-
+		// calculates result= k_1 + 2* k_2 + 2* k_3
+		resultState = results[i];
+		resultState->position += (tmpState.position * 2);
+		resultState->velocity += (tmpState.velocity * 2);
 		scaleQuaternion(2, tmpState.rotation, qdot);
-		addQuaternions(lastResult.rotation, qdot, qdot);
-		tmpState.rotation = qdot;
-
-		tmpState.angularVelocity = lastResult.angularVelocity + (tmpState.angularVelocity * 2);
-
-		results[i] = tmpState;
+		addQuaternions(resultState->rotation, qdot, qdot);
+		resultState->rotation = qdot;
+		resultState->angularVelocity += (tmpState.angularVelocity * 2);
 		
 
 		rigidBody->resetForces();
@@ -300,40 +302,41 @@ void Simulation::simulateRungeKutta4(Real h)
 		if (rigidBody->isStatic())
 			continue;
 
+		// calculates the derivatives
 		calculateXdot(rigidBody, xdot);
 		calculateVdot(rigidBody, vdot);
 		calculateQdot(rigidBody, qdot);
 		calculateWdot(rigidBody, wdot);
 
-		lastResult = results[i];
+		// calculate k_4
 		tmpState.position = h*xdot;
 		tmpState.velocity = h*vdot;
 		scaleQuaternion(h, qdot, qdot);
 		tmpState.rotation = qdot;
 		tmpState.angularVelocity = h*wdot;
 
+		resultState = results[i];
 		initialState = initialStates[i];
 
-		tmpState.position = lastResult.position + (tmpState.position);
-		tmpState.velocity = lastResult.velocity + (tmpState.velocity);
-		addQuaternions(lastResult.rotation, tmpState.rotation, qdot);
+		// calculates the result= 1/6 * (k_1 + 2* k_2 + 2* k_3 + k4)
+		tmpState.position = factor*(resultState->position + (tmpState.position));
+		tmpState.velocity = factor*(resultState->velocity + (tmpState.velocity));
+		addQuaternions(resultState->rotation, tmpState.rotation, qdot);
+		scaleQuaternion(factor, qdot, qdot);
 		tmpState.rotation = qdot;
-		tmpState.angularVelocity = lastResult.angularVelocity + tmpState.angularVelocity;
+		tmpState.angularVelocity = factor*(resultState->angularVelocity + tmpState.angularVelocity);
 
-		
-	
-		rigidBody->setPosition((initialState.position + (factor *tmpState.position)));
-		rigidBody->setVelocity((initialState.velocity + (factor *tmpState.velocity)));
-
-		scaleQuaternion(factor, tmpState.rotation, qdot);
-		addQuaternions(initialState.rotation, qdot, qdot);
+		// sets the end result = z_0 + end result
+		rigidBody->setPosition((initialState->position + tmpState.position));
+		rigidBody->setVelocity((initialState->velocity + tmpState.velocity));
+		addQuaternions(initialState->rotation, tmpState.rotation, qdot);
 		rigidBody->setRotation(qdot.normalized());
-
-		rigidBody->setAngulaVelocity((initialState.angularVelocity + (factor * tmpState.angularVelocity)));
-
-		
-		//results[i] = tmpState;
+		rigidBody->setAngulaVelocity((initialState->angularVelocity + tmpState.angularVelocity));
 		rigidBody->resetForces();
+
+		delete resultState;
+		delete initialState;
+
 		i++;
 
 	}
