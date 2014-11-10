@@ -57,6 +57,8 @@ void cleanup();
 void resetSim() {
 	// Delete all created objects
 	SimulationManager::getInstance()->getObjectManager().resetObjectManager();
+	// Reset time
+	TimeManager::getCurrent()->setTime(0.0);
 	// Re-initialize scene 
 	buildModel();
 }
