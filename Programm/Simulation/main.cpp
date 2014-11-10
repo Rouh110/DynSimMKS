@@ -78,10 +78,12 @@ void TW_CALL getApproximationCB(void *value, void *clientData) {
 }
 
 void TW_CALL setTimeStepCB(const void *value, void *clientData) {
+	// Set the new time step value
 	float timeStep = *(const float *)(value);
 	TimeManager::getCurrent()->setTimeStepSize(timeStep);
 }
 void TW_CALL getTimeStepCB(void *value, void *clientData) {
+	// Get the current time step value
 	float timeStep = TimeManager::getCurrent()->getTimeStepSize();
 	*(float *)(value) = float(timeStep);
 }
@@ -114,12 +116,14 @@ int main( int argc, char **argv )
 	// Create a type for the enum shapeEV
 	TwType approximationType = TwDefineEnum("ApproximationType", approximationEV, 2);
 	TwAddVarCB(MiniGL::m_tweakBar, "Approximation Method", approximationType, setApproximationCB, getApproximationCB, NULL, "");
-	// Create reset button 
-	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSim, NULL, "");
+	// Create value to increase/decrease timestepsize during runtime
+	// min: 0.01 , step size: 0.01
+	TwAddVarCB(MiniGL::m_tweakBar, "Time Step", TW_TYPE_FLOAT, setTimeStepCB, getTimeStepCB, NULL, "min=0.01 step=0.01");
 	// Create button to reset camera
 	TwAddButton(MiniGL::m_tweakBar, "Reset Camera", resetCam, NULL, "");
-
-	TwAddVarCB(MiniGL::m_tweakBar, "Time Step", TW_TYPE_FLOAT, setTimeStepCB, getTimeStepCB, NULL, "min=0.01 step=0.01");
+	// Create reset button 
+	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSim, NULL, "");
+	
 
 	buildModel ();
 
