@@ -54,6 +54,36 @@ void render ();
 void cleanup();
 
 
+void resetSim() {
+	// Delete all created objects
+	SimulationManager::getInstance()->getObjectManager().resetObjectManager();
+	// Re-initialize scene 
+	buildModel();
+}
+
+void TW_CALL setSceneCB(const void *value, void *clientData) {
+	int integration = *(const int *)(value);
+	switch (integration) {
+	case 0:
+		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK1);
+		resetSim();
+		break;
+
+	case 1:
+		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK2);
+		resetSim();
+		break;
+
+
+	default:
+		break;
+	}
+}
+
+void TW_CALL getSceneCB(void *value, void *clientData) {
+	Simulation::CurrentScene scene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
+	*(int *)(value) = int(scene);
+}
 
 void TW_CALL setApproximationCB(const void *value, void *clientData) {
 	int integration = *(const int *)(value);
@@ -88,17 +118,15 @@ void TW_CALL getTimeStepCB(void *value, void *clientData) {
 	*(float *)(value) = float(timeStep);
 }
 
-void TW_CALL resetSim(void *clientData) {
-	// Delete all created objects
-	SimulationManager::getInstance()->getObjectManager().resetObjectManager();
-	// Re-initialize scene 
-	buildModel();
+void TW_CALL resetSimBTN(void *clientData) {
+	resetSim();
 }
 
-void TW_CALL resetCam(void *clientData) {
+void TW_CALL resetCamBTN(void *clientData) {
 	// Reset Viewport
 	MiniGL::setViewport(40.0f, 1.0f, 100.0f, Vector3d(0.0, 1.0, 10.0), Vector3d(0.0, 0.0, 0.0));
 }
+
 
 // main 
 int main( int argc, char **argv )
@@ -112,6 +140,11 @@ int main( int argc, char **argv )
 	MiniGL::setClientIdleFunc (50, timeStep);		
 
 	// set tweakBar
+	TwEnumVal sceneEV[] = { { 0, "Task 1" }, { 1, "Task 2" } };
+	// Create a type for the enum sceneEV
+	TwType sceneType = TwDefineEnum("SceneType", sceneEV, 2);
+	TwAddVarCB(MiniGL::m_tweakBar, "Scene", sceneType, setSceneCB, getSceneCB, NULL, "");
+
 	TwEnumVal approximationEV[] = { { 0, "Explicit Euler" }, { 1, "Runge Kutta 4" } };
 	// Create a type for the enum shapeEV
 	TwType approximationType = TwDefineEnum("ApproximationType", approximationEV, 2);
@@ -120,9 +153,9 @@ int main( int argc, char **argv )
 	// min: 0.01 , step size: 0.01
 	TwAddVarCB(MiniGL::m_tweakBar, "Time Step", TW_TYPE_FLOAT, setTimeStepCB, getTimeStepCB, NULL, "min=0.01 step=0.01");
 	// Create button to reset camera
-	TwAddButton(MiniGL::m_tweakBar, "Reset Camera", resetCam, NULL, "");
+	TwAddButton(MiniGL::m_tweakBar, "Reset Camera", resetCamBTN, NULL, "");
 	// Create reset button 
-	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSim, NULL, "");
+	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSimBTN, NULL, "");
 	
 
 	buildModel ();
@@ -166,8 +199,25 @@ void buildModel ()
 	
 	//TestScene01 scene;
 	//scene.initializeScene();
+	//TestScene02 scene2;
+	//scene2.initializeScene();
+
+	Simulation::CurrentScene currScene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
+	TestScene01 scene;
 	TestScene02 scene2;
-	scene2.initializeScene();
+	switch (currScene) {
+	case Simulation::TASK1:
+		scene.initializeScene();
+		break;
+
+	case Simulation::TASK2:
+		scene2.initializeScene();
+		break;
+
+
+	default:
+		break;
+	}
 
 }
 

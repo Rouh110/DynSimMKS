@@ -11,8 +11,10 @@ class Simulation
 {
 public:
 	enum ApproximationMethod {EXPLICIT_EULER, RUNGE_KUTTA_4};
+	enum CurrentScene {TASK1, TASK2};
 protected:
 	ApproximationMethod approximationMethod;
+	CurrentScene currentScene;
 	unsigned int iterationCount;
 public:
 	Simulation();
@@ -25,6 +27,14 @@ public:
 
 	/*Returns the Approximation method currently used, to compute the Forces.*/
 	ApproximationMethod getApproximationMethod();
+
+	/*
+	Sets the current scene
+	*/
+	void setCurrentScene(CurrentScene scene);
+
+	/*Returns the current scene.*/
+	CurrentScene getCurrentScene();
 
 	/*Updates the Simualtion*/
 	void update(Real h);
