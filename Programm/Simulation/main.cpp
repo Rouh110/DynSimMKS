@@ -62,6 +62,7 @@ void resetSim() {
 }
 
 void TW_CALL setSceneCB(const void *value, void *clientData) {
+	// Set the new scene and reset the simulation
 	int integration = *(const int *)(value);
 	switch (integration) {
 	case 0:
@@ -81,6 +82,7 @@ void TW_CALL setSceneCB(const void *value, void *clientData) {
 }
 
 void TW_CALL getSceneCB(void *value, void *clientData) {
+	// Return the current scene
 	Simulation::CurrentScene scene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
 	*(int *)(value) = int(scene);
 }
@@ -119,6 +121,7 @@ void TW_CALL getTimeStepCB(void *value, void *clientData) {
 }
 
 void TW_CALL resetSimBTN(void *clientData) {
+	// Call rest sim function
 	resetSim();
 }
 
@@ -140,11 +143,12 @@ int main( int argc, char **argv )
 	MiniGL::setClientIdleFunc (50, timeStep);		
 
 	// set tweakBar
+	// Scene Switch
 	TwEnumVal sceneEV[] = { { 0, "Task 1" }, { 1, "Task 2" } };
 	// Create a type for the enum sceneEV
 	TwType sceneType = TwDefineEnum("SceneType", sceneEV, 2);
 	TwAddVarCB(MiniGL::m_tweakBar, "Scene", sceneType, setSceneCB, getSceneCB, NULL, "");
-
+	// Approximation Switch
 	TwEnumVal approximationEV[] = { { 0, "Explicit Euler" }, { 1, "Runge Kutta 4" } };
 	// Create a type for the enum shapeEV
 	TwType approximationType = TwDefineEnum("ApproximationType", approximationEV, 2);
@@ -202,9 +206,11 @@ void buildModel ()
 	//TestScene02 scene2;
 	//scene2.initializeScene();
 
+	// Get current scene
 	Simulation::CurrentScene currScene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
 	TestScene01 scene;
 	TestScene02 scene2;
+	// Init the current scene
 	switch (currScene) {
 	case Simulation::TASK1:
 		scene.initializeScene();
