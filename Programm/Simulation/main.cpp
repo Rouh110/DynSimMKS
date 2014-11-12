@@ -270,6 +270,13 @@ void render ()
 	{
 		force->render();
 	}
+
+
+	for each (IJoint  *  joint in SimulationManager::getInstance()->getObjectManager().getJoints())
+	{
+		joint->render();
+	}
+
 	MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());
 
 }

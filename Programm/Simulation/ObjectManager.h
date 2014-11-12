@@ -1,6 +1,7 @@
 #pragma once
 #include "RigidBody.h"
 #include "Simulation\IForce.h"
+#include "Simulation\IJoint.h"
 #include <vector>
 
 /*
@@ -13,6 +14,8 @@ private:
 	IForce *f;
 	std::vector<RigidBody*> rigidBodies;
 	std::vector<IForce*> forces;
+	std::vector<IJoint*> joints;
+
 public:
 	ObjectManager();
 	~ObjectManager();
@@ -22,6 +25,7 @@ public:
 	*/
 	void addObject(RigidBody *rigidBody);
 	void addObject(IForce *force);
+	void addObject(IJoint *joint);
 
 	/*
 	Returns all the Rigidbodys that are currently in the Objectmanger
@@ -29,9 +33,14 @@ public:
 	const std::vector<RigidBody*> &getRigidBodies() const;
 
 	/*
-	Returns all Forces thar are currently in the Objectmanager
+	Returns all Forces that are currently in the Objectmanager
 	*/
 	const std::vector<IForce*> &getForces() const;
+
+	/*
+	Return all Joints that are currently in the Object Manager
+	*/
+	const std::vector<IJoint*> &getJoints() const;
 
 	/*
 	Deletes all the Object in the Objectmanager and clears all the lists.
