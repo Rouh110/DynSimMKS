@@ -412,6 +412,38 @@ void Simulation::calculateWdot(const Vector3d & angularVelocity, const Matrix3d 
 	//multDiagonalMatrix2Vector(invertedInertiaTensor, torque - angularVelocity.cross(result), result);
 }
 
+
+// 0 -az ay
+// az 0 -ax
+//-ay ax 0
+void getCrossMatrix(const Vector3d & vector ,Matrix3d & result)
+{
+	result <<	0, -vector.z(), vector.y(),
+				vector.z(),	0, -vector.x(),
+				-vector.y(), vector.x(),0;
+}
+
+void Simulation::calculateK(const RigidBody & rigidBody, const Vector3d & ras, const Vector3d & rbs, Matrix3d & result)
+{
+	
+	Matrix3d ras_m;
+	Matrix3d rbs_m;
+	getCrossMatrix(ras, ras_m);
+	getCrossMatrix(rbs, rbs_m);
+
+	calculateK(rigidBody, ras_m, rbs_m, result);
+	
+}
+
+void Simulation::calculateK(const RigidBody & rigidBody, const Matrix3d & ras, const Matrix3d & rbs, Matrix3d & result)
+{
+	Matrix3d invertedInertiaTensor;
+	rigidBody.getInvertedInertiaTensor(invertedInertiaTensor);
+	Real mass = rigidBody.getMass();
+
+	result = ((1.0 / mass)*Matrix3d::Identity()) - ras*(invertedInertiaTensor*rbs);
+}
+
 void Simulation::computeAllForces(Real time)
 {
 	for each (IForce* force in SimulationManager::getInstance()->getObjectManager().getForces())

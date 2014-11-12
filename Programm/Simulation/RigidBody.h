@@ -64,6 +64,10 @@ public:
 	/*Adds torque to the rigidbody*/
 	void addTorqe(const Eigen::Vector3d & torque);
 
+	
+	/*Adds an Impulse to the RigidBody.*/
+	void addRasImpuls(const Eigen::Vector3d & impulse, const Eigen::Vector3d & ras);
+
 	/*
 	Resets the fores to zero.
 	*/

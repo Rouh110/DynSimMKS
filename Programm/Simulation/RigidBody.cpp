@@ -88,6 +88,16 @@ void RigidBody::addForce(const Eigen::Vector3d &force)
 {
 	this->force += force;
 }
+
+
+void RigidBody::addRasImpuls(const Vector3d & impulse, const Vector3d & ras)
+{
+	setVelocity(velocity+ (1.0/mass * impulse));
+	Matrix3d invertedInertiaTensor;
+	getInvertedInertiaTensor(invertedInertiaTensor);
+	setAngulaVelocity(angulaVelocity + (invertedInertiaTensor * (ras.cross(impulse))));
+}
+
 void RigidBody::resetForces()
 {
 	force.setZero();

@@ -239,7 +239,6 @@ void render ()
 	Vector3d pos;	
 	Cube *c;
 	Sphere *s;
-
 	
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
