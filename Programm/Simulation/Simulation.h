@@ -11,7 +11,7 @@ class Simulation
 {
 public:
 	enum ApproximationMethod {EXPLICIT_EULER, RUNGE_KUTTA_4};
-	enum CurrentScene {TASK1, TASK2};
+	enum CurrentScene {TASK1, TASK2, TASK3};
 protected:
 	ApproximationMethod approximationMethod;
 	CurrentScene currentScene;

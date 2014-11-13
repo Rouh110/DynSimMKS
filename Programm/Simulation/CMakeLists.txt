@@ -40,6 +40,8 @@ ADD_EXECUTABLE(Simulation
 	  IJoint.h
 	  SphericalJoint.cpp
 	  SphericalJoint.h
+	  ImpulseTest.cpp
+	  ImpulseTest.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  

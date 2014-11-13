@@ -37,6 +37,7 @@
 #include "Simulation/SimulationManager.h"
 #include "TestScene01.h"
 #include "TestScene02.h"
+#include "ImpulseTest.h"
 
 
 // Enable memory leak detection
@@ -48,6 +49,7 @@ using namespace IBDS;
 using namespace Eigen;
 using namespace std;
 
+IScene *currentScene = 0;
 void timeStep ();
 void buildModel ();
 void render ();
@@ -59,6 +61,7 @@ void resetSim() {
 	SimulationManager::getInstance()->getObjectManager().resetObjectManager();
 	// Reset time
 	TimeManager::getCurrent()->setTime(0.0);
+
 	// Re-initialize scene 
 	buildModel();
 }
@@ -76,7 +79,9 @@ void TW_CALL setSceneCB(const void *value, void *clientData) {
 		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK2);
 		resetSim();
 		break;
-
+	case 2:
+		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK3);
+		resetSim();
 
 	default:
 		break;
@@ -99,7 +104,6 @@ void TW_CALL setApproximationCB(const void *value, void *clientData) {
 	case 1:
 		SimulationManager::getInstance()->getSimulation().setApproximationMethod(Simulation::RUNGE_KUTTA_4);
 		break;
-
 
 	default:
 		break;
@@ -146,9 +150,9 @@ int main( int argc, char **argv )
 
 	// set tweakBar
 	// Scene Switch
-	TwEnumVal sceneEV[] = { { 0, "Task 1" }, { 1, "Task 2" } };
+	TwEnumVal sceneEV[] = { { 0, "Task 1" }, { 1, "Task 2" }, {2,"Task 3"} };
 	// Create a type for the enum sceneEV
-	TwType sceneType = TwDefineEnum("SceneType", sceneEV, 2);
+	TwType sceneType = TwDefineEnum("SceneType", sceneEV, 3);
 	TwAddVarCB(MiniGL::m_tweakBar, "Scene", sceneType, setSceneCB, getSceneCB, NULL, "");
 	// Approximation Switch
 	TwEnumVal approximationEV[] = { { 0, "Explicit Euler" }, { 1, "Runge Kutta 4" } };
@@ -190,6 +194,11 @@ void timeStep ()
 	const Real h = tm->getTimeStepSize();
 
 	//update Simulation
+	if (currentScene != 0)
+	{
+		currentScene->update(tm->getTime());
+	}
+
 	SimulationManager::getInstance()->getSimulation().update(h);
 	tm->setTime(tm->getTime() + h);
 
@@ -203,29 +212,35 @@ void buildModel ()
 	//SimulationManager::getInstance()->getSimulation().setApproximationMethod(Simulation::RUNGE_KUTTA_4);
 	// Create simulation model
 	
-	//TestScene01 scene;
-	//scene.initializeScene();
-	//TestScene02 scene2;
-	//scene2.initializeScene();
-
 	// Get current scene
 	Simulation::CurrentScene currScene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
-	TestScene01 scene;
-	TestScene02 scene2;
+
 	// Init the current scene
+
+	if (currentScene == 0)
+	{
+		delete currentScene;
+	}
+
 	switch (currScene) {
 	case Simulation::TASK1:
-		scene.initializeScene();
+		currentScene = new TestScene01;
 		break;
-
 	case Simulation::TASK2:
-		scene2.initializeScene();
+		currentScene = new TestScene02;
 		break;
-
-
+	case Simulation::TASK3:
+		currentScene = new ImpulseTest;
+		break;
 	default:
 		break;
 	}
+
+	if (currentScene != 0)
+	{
+		currentScene->initializeScene();
+	}
+	
 
 }
 
