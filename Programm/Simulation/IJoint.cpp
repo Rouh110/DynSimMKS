@@ -20,18 +20,58 @@ void IJoint::setJointPoints(RigidBody * rigidBodyA, RigidBody *rigidBodyB, const
 	pointB = rigidBodyB->getRotation().inverse()._transformVector(jointPoint - rigidBodyB->getPosition());
 }
 
+void IJoint::getRas(Vector3d & out_rsa)
+{
+	out_rsa = rigidBodyA->getRotation()._transformVector(pointA);
+}
+
+
+void IJoint::getRbs(Vector3d & out_rsb)
+{
+	out_rsb = rigidBodyB->getRotation()._transformVector(pointB);
+}
+
 void IJoint::getGlobalPointA(Vector3d & out_pointA)
 {
-	out_pointA = rigidBodyA->getRotation()._transformVector(pointA) + rigidBodyA->getPosition();
+	if (rigidBodyA != 0 )
+	{
+		out_pointA = rigidBodyA->getRotation()._transformVector(pointA) + rigidBodyA->getPosition();
+	}
+	else
+	{
+		out_pointA = pointA;
+	}
 }
 
 void IJoint::getGlobalPointB(Vector3d & out_pointB)
 {
-	out_pointB = rigidBodyB->getRotation()._transformVector(pointB) + rigidBodyB->getPosition();
+	if (rigidBodyB != 0)
+	{
+		out_pointB = rigidBodyB->getRotation()._transformVector(pointB) + rigidBodyB->getPosition();
+	}
+	else
+	{
+		out_pointB = pointB;
+	}
+	
 }
+
+RigidBody * IJoint::getRigidBodyA()
+{
+	return rigidBodyA;
+}
+
+RigidBody * IJoint::getRigidBodyB()
+{
+	return rigidBodyB;
+}
+
 
 void IJoint::addToObjectManager()
 {
 	SimulationManager::getInstance()->getObjectManager().addObject(this);
 }
+
+
+
 

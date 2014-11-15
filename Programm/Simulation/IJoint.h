@@ -30,6 +30,18 @@ public:
 	*/
 	virtual void getCurrentError(Vector3d & out_Error) = 0;
 
+	/*Returns the ras vector in global space*/
+	virtual void getRas(Vector3d & out_rsa);
+
+	/*Return the rbs vector in global space*/
+	virtual void getRbs(Vector3d & out_rsb);
+
+	/*returns the rigid body A*/
+	RigidBody * getRigidBodyA();
+
+	/*returns the rigid body B*/
+	RigidBody * getRigidBodyB();
+
 	/*
 	Renders the Joint. Override if the Joints has a grafikal representation.
 	*/
@@ -50,5 +62,6 @@ protected:
 	Add this Joint to the ObjectManager.
 	*/
 	virtual void addToObjectManager();
+
 };
 

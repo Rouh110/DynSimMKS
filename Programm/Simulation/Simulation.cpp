@@ -39,6 +39,9 @@ Simulation::CurrentScene Simulation::getCurrentScene()
 
 void Simulation::update(Real h)
 {
+
+	
+
 	switch (approximationMethod)
 	{
 	case EXPLICIT_EULER:
@@ -48,6 +51,10 @@ void Simulation::update(Real h)
 		simulateRungeKutta4(h);
 		break;
 	}
+
+	simulateJointsPredictorCorrector(h);
+	
+
 	resetForces();
 	
 }
@@ -119,7 +126,6 @@ void Simulation::simulateExplicitEuler(Real h)
 
 		// calculate q
 		calculateQdot(rigidBody, tempQuaternion);
-		//tempQuaternion.normalize();
 		scaleQuaternion(h, tempQuaternion, tempQuaternion);
 		addQuaternions(rigidBody->getRotation(), tempQuaternion, tempQuaternion);
 		rigidBody->setRotation(tempQuaternion.normalized());
@@ -412,6 +418,154 @@ void Simulation::calculateWdot(const Vector3d & angularVelocity, const Matrix3d 
 	//multDiagonalMatrix2Vector(invertedInertiaTensor, torque - angularVelocity.cross(result), result);
 }
 
+
+
+
+void Simulation::simulateJointsPredictorCorrector(Real h)
+{
+	Real damper = (1.0 - 0.00001);
+	Real maxError = 0;
+	Real norm;
+	Vector3d error;
+	Matrix3d *inverseK;
+	Vector3d impulse;
+	RigidBody* rigidBodyA;
+	RigidBody* rigidBodyB;
+	Vector3d tmp;
+
+	Real delta = 0.000001;
+	std::vector<Matrix3d *> inverseKs;
+	bool first = true;
+	
+	Real factor = 1.0 / h;
+
+	Matrix3d Kaa;
+	Matrix3d Kbb;
+	Quaterniond tmpQuaternion;
+
+	int n = 0;
+	int i;
+	do
+	{
+		maxError = 0.0;
+		i = 0;
+		for each (IJoint* joint in SimulationManager::getInstance()->getObjectManager().getJoints())
+		{
+			rigidBodyA = joint->getRigidBodyA();
+			rigidBodyB = joint->getRigidBodyB();
+
+			if (first)
+			{
+				
+				//setup inverse K
+				inverseK = new Matrix3d();
+				
+				if (!rigidBodyA->isStatic())
+				{
+					joint->getRas(tmp);
+					calculateK(*rigidBodyA, tmp, tmp, Kaa);
+				}
+				else
+				{
+					Kaa = Matrix3d::Zero();
+				}
+				
+				if (!rigidBodyB->isStatic())
+				{
+					joint->getRbs(tmp);
+					calculateK(*rigidBodyB, tmp, tmp, Kbb);
+				}
+				else
+				{
+					Kbb = Matrix3d::Zero();
+				}
+				
+
+				(*inverseK) = (Kaa +Kbb).inverse();
+
+				inverseKs.push_back(inverseK);
+				first = false;
+			}
+			else
+			{
+				inverseK = inverseKs[i];
+			}
+
+			joint->getCurrentError(error);
+
+			norm = std::abs(error.norm());
+			
+			printf("%f, %f\n", maxError, norm);
+			if (maxError < norm)
+			{
+				maxError = norm;
+			}
+				
+
+			if (norm <= delta)
+				continue;
+
+			// calculate impulse
+			impulse = (*inverseK)* factor * error;
+	
+			if (!rigidBodyA->isStatic())
+			{
+				joint->getRas(tmp);
+				rigidBodyA->addRasImpuls(impulse*1, tmp);
+				//rigidBodyA->setVelocity(rigidBodyA->getVelocity()*damper);
+				//rigidBodyA->setAngulaVelocity(rigidBodyA->getAngulaVelocity()*damper);
+			}
+			
+			
+			
+			if (!rigidBodyB->isStatic())
+			{
+				joint->getRbs(tmp);
+				rigidBodyB->addRasImpuls(impulse * -1, tmp);
+				//rigidBodyB->setVelocity(rigidBodyB->getVelocity()*damper);
+				//rigidBodyB->setAngulaVelocity(rigidBodyB->getAngulaVelocity()*damper);				
+			}
+			
+
+			i++;
+
+		}
+
+		//prediktor
+
+		for each (RigidBody * rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+		{
+			if (rigidBody->isStatic())
+			{
+				continue;
+			}
+
+			// calculate X
+			calculateXdot(rigidBody, tmp);
+			rigidBody->setPosition(rigidBody->getPosition() + h* tmp);
+
+			// calculate q
+			calculateQdot(rigidBody, tmpQuaternion);
+			scaleQuaternion(h, tmpQuaternion, tmpQuaternion);
+			addQuaternions(rigidBody->getRotation(), tmpQuaternion, tmpQuaternion);
+			rigidBody->setRotation(tmpQuaternion.normalized());
+		}
+		
+		if (maxError > delta)
+			printf("jo\n");
+		else
+			printf("%f\n", maxError);
+		n++;
+	} while (n < 10);//maxError > delta);
+
+	// clean up
+	for each (Matrix3d * matrix in inverseKs)
+	{
+
+		delete matrix;
+	}
+
+}
 
 // 0 -az ay
 // az 0 -ax

@@ -1,6 +1,7 @@
 #pragma once
 #include "Eigen/Dense"
 #include "RigidBody.h"
+#include "Common\Config.h"
 
 using namespace Eigen;
 
@@ -54,6 +55,12 @@ protected:
 	Compute the simulation with Runge Kutta
 	*/
 	void simulateRungeKutta4(Real h);
+
+	/*Simulate the joints for one time step with the predictor-corrector procedure*/
+	void simulateJointsPredictorCorrector(Real h);
+
+	/* Compute one step with predictor-corrector procedure for all joint*/
+	void computeJoints();
 
 	/*
 	Calculate the derivation of the position.
