@@ -17,9 +17,12 @@ protected:
 	Eigen::Vector3d position;
 	Eigen::Vector3d velocity;
 	Eigen::Vector3d angulaVelocity;
+	Eigen::Quaterniond rotation;
 	Eigen::Vector3d torque;
 	Eigen::Vector3d force;
-	Eigen::Quaterniond rotation;
+	Eigen::Vector3d impulse;
+	Eigen::Vector3d torqueImpulse;
+	
 public:
 	RigidBody();
 	~RigidBody();
@@ -37,6 +40,8 @@ public:
 	const Eigen::Vector3d& getTorque() const;
 	const Eigen::Vector3d& getForce() const;
 	const Eigen::Quaterniond& getRotation() const;
+	const Eigen::Vector3d& getImpulse() const;
+	const Eigen::Vector3d& getTorqueImpulse() const;
 	
 	/*
 	Sets the mass. The Rigidbody will be static if the mass is 0.
@@ -72,6 +77,12 @@ public:
 	Resets the fores to zero.
 	*/
 	void resetForces();
+
+	/*
+	Resets the impulse and impulseTorque to zero.
+	*/
+	void resetImpulse();
+
 	/*Sets the rotation of the RigidBody. The Rotation must be normalized !!!!*/
 	void setRotation(const Eigen::Quaterniond & rotation);
 

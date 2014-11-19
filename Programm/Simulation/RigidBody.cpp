@@ -14,6 +14,8 @@ RigidBody::RigidBody()
 	angulaVelocity.setZero();
 	torque.setZero();
 	force.setZero();
+	impulse.setZero();
+	torqueImpulse.setZero();
 	rotation.setIdentity();
 }
 
@@ -24,7 +26,6 @@ RigidBody::~RigidBody()
 
 bool RigidBody::isStatic() const
 {
-	
 	return std::abs(mass) <= SimMath::eps;
 }
 
@@ -67,6 +68,15 @@ const Eigen::Quaterniond& RigidBody::getRotation() const
 	return rotation;
 }
 
+const Eigen::Vector3d& RigidBody::getImpulse() const
+{
+	return impulse;
+}
+const Eigen::Vector3d& RigidBody::getTorqueImpulse() const
+{
+	return torqueImpulse;
+}
+
 
 void RigidBody::setMass(Real mass)
 {
@@ -92,15 +102,27 @@ void RigidBody::addForce(const Eigen::Vector3d &force)
 
 void RigidBody::addRasImpuls(const Vector3d & impulse, const Vector3d & ras)
 {
+	Matrix3d invertedInertiaTensor;
+	getInvertedInertiaTensor(invertedInertiaTensor);
+	this->impulse += impulse;
+	torqueImpulse += invertedInertiaTensor * (ras.cross(impulse));
+	/*
 	setVelocity(velocity+ (1.0/mass * impulse));
 	Matrix3d invertedInertiaTensor;
 	getInvertedInertiaTensor(invertedInertiaTensor);
 	setAngulaVelocity(angulaVelocity + (invertedInertiaTensor * (ras.cross(impulse))));
+	*/
 }
 
 void RigidBody::resetForces()
 {
 	force.setZero();
+	torque.setZero();
+}
+
+void RigidBody::resetImpulse()
+{
+	impulse.setZero();
 	torque.setZero();
 }
 

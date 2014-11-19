@@ -56,6 +56,8 @@ void ObjectManager::resetObjectManager()
 		delete (*it);
 	}
 
+	joints.clear();
+
 	//delete all RigidBodys
 	for (std::vector<RigidBody*>::iterator it = rigidBodies.begin(); it != rigidBodies.end(); ++it)
 	{

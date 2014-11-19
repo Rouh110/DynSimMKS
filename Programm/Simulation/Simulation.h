@@ -2,6 +2,7 @@
 #include "Eigen/Dense"
 #include "RigidBody.h"
 #include "Common\Config.h"
+#include <vector>
 
 using namespace Eigen;
 
@@ -57,10 +58,10 @@ protected:
 	void simulateRungeKutta4(Real h);
 
 	/*Simulate the joints for one time step with the predictor-corrector procedure*/
-	void simulateJointsPredictorCorrector(Real h);
+	void simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*> &inverseKs, Real acceptedError, Real maxError = 0);
 
 	/* Compute one step with predictor-corrector procedure for all joint*/
-	void computeJoints();
+	void computeJoints(Real h);
 
 	/*
 	Calculate the derivation of the position.
@@ -98,6 +99,18 @@ protected:
 
 	/*Computes every force currenty in the scene*/
 	void computeAllForces(Real time);
+
+	/*Compute the impulse for all RigidBodys
+	Resets the Impulse in each RigidBody
+	static RigidBodys will be ignored*/
+	void computeImpulse();
+
+	/*set up the inverse of K and stor it in the given vector.
+	Don't forget to delete all K*/
+	void setUpKInverse(std::vector<Matrix3d*> &out_KInverseList);
+
+	/*Calculates the the corrector impulses for every Joint and add them to the rigidBodys*/
+	void computeAllJoint(Real h,const std::vector<Matrix3d*> &KInverses, Real acceptedError,Real & out_maxError);
 
 };
 
