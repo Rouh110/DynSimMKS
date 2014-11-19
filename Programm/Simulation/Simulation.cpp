@@ -199,6 +199,7 @@ void Simulation::simulateExplicitEuler(Real h)
 
 	}
 	
+
 	computeAllJoint(h, inverseKs, delta, maxError);
 
 	simulateJointsPredictorCorrector(h,inverseKs,delta,maxError);
@@ -303,7 +304,6 @@ void Simulation::simulateRungeKutta4(Real h)
 	}
 	
 	//computeAllJoint(h/2, inverseKs, delta, maxError);
-
 	//simulateJointsPredictorCorrector(h/2, inverseKs, delta, maxError);
 
 	//k2
@@ -353,7 +353,6 @@ void Simulation::simulateRungeKutta4(Real h)
 	}
 
 	//computeAllJoint(h/2, inverseKs, delta, maxError);
-
 	//simulateJointsPredictorCorrector(h/2, inverseKs, delta, maxError);
 	
 	//k3
@@ -402,9 +401,8 @@ void Simulation::simulateRungeKutta4(Real h)
 
 	}
 	
-	//computeAllJoint(h/2, inverseKs, delta, maxError);
-
-	//simulateJointsPredictorCorrector(h/2, inverseKs, delta, maxError);
+	//computeAllJoint(h, inverseKs, delta, maxError);
+	//simulateJointsPredictorCorrector(h, inverseKs, delta, maxError);
 
 	//k4
 	computeAllForces(time + h);
@@ -535,11 +533,11 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 	Vector3d deltaAngularVel;
 	Quaterniond q;
 
-	int maxIterations = 20;
+	int maxIterations = 100;
 	int n = 0;
 	
 	/*should be between 1 and 0*/
-	Real damper = 0.0000;
+	Real damper = 0.00000;
 	Real damperFactor = 1 - damper;
 	
 	bool dampingJoint = false;
@@ -576,7 +574,7 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 		n++;
 	}
 
-	dampingJoint = false;
+	dampingJoint = true;
 	if (dampingJoint)
 	{
 		for each (RigidBody *rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
@@ -690,7 +688,7 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 		if (!rigidBodyA->isStatic())
 		{
 			joint->getRas(tmp);
-			rigidBodyA->addRasImpuls(impulse * 1, tmp);
+			rigidBodyA->addRasImpuls(impulse, tmp);
 			//rigidBodyA->setVelocity(rigidBodyA->getVelocity()*damper);
 			//rigidBodyA->setAngulaVelocity(rigidBodyA->getAngulaVelocity()*damper);
 		}

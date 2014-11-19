@@ -123,7 +123,7 @@ void RigidBody::resetForces()
 void RigidBody::resetImpulse()
 {
 	impulse.setZero();
-	torque.setZero();
+	torqueImpulse.setZero();
 }
 
 void RigidBody::setRotation(const Eigen::Quaterniond & rotation)
