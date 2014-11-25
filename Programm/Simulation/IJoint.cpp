@@ -31,6 +31,15 @@ void IJoint::getRbs(Vector3d & out_rsb)
 	out_rsb = rigidBodyB->getRotation()._transformVector(pointB);
 }
 
+void IJoint::getLocalPointA(Vector3d & out_point)
+{
+	out_point = pointA;
+}
+void IJoint::getLocalPointB(Vector3d & out_point)
+{
+	out_point = pointB;
+}
+
 void IJoint::getGlobalPointA(Vector3d & out_pointA)
 {
 	if (rigidBodyA != 0 )

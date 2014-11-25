@@ -105,12 +105,20 @@ protected:
 	static RigidBodys will be ignored*/
 	void computeImpulse();
 
+	/* Compute the impulse for the given RigidBody
+	Resets the Impulse in the RigidBody.
+	static RigidBodys will be ignored.*/
+	void computeImpulse(RigidBody * rigidBody);
+
 	/*set up the inverse of K and stor it in the given vector.
 	Don't forget to delete all K*/
 	void setUpKInverse(std::vector<Matrix3d*> &out_KInverseList);
 
 	/*Calculates the the corrector impulses for every Joint and add them to the rigidBodys*/
 	void computeAllJoint(Real h,const std::vector<Matrix3d*> &KInverses, Real acceptedError,Real & out_maxError);
+
+	/**/
+	void computeVeloctyCorrection();
 
 };
 

@@ -36,6 +36,20 @@ public:
 	/*Return the rbs vector in global space*/
 	virtual void getRbs(Vector3d & out_rsb);
 
+	virtual void getLocalPointA(Vector3d & out_point);
+
+	virtual void getLocalPointB(Vector3d & out_point);
+
+	/*
+	returns the point A in global space.
+	*/
+	virtual void getGlobalPointA(Vector3d & out_pointA);
+
+	/*
+	Returns the point B in global space.
+	*/
+	virtual void getGlobalPointB(Vector3d & out_pointB);
+	
 	/*returns the rigid body A*/
 	RigidBody * getRigidBodyA();
 
@@ -48,16 +62,7 @@ public:
 	virtual void render(){}
 
 protected:
-	/*
-	returns the point A in global space.
-	*/
-	virtual void getGlobalPointA(Vector3d & out_pointA);
-
-	/*
-	Returns the point B in global space.
-	*/
-	virtual void getGlobalPointB(Vector3d & out_pointB);
-
+	
 	/*
 	Add this Joint to the ObjectManager.
 	*/

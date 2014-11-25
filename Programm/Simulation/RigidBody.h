@@ -36,6 +36,8 @@ public:
 
 	const Eigen::Vector3d& getPosition() const;
 	const Eigen::Vector3d& getVelocity() const;
+	void getVelocityOfLocalPoint(const Eigen::Vector3d & point, Eigen::Vector3d & out_velocity) const;
+	void getVelocityOfGlobalPoint(const Eigen::Vector3d & point, Eigen::Vector3d & out_velocity) const;
 	const Eigen::Vector3d& getAngulaVelocity()const;
 	const Eigen::Vector3d& getTorque() const;
 	const Eigen::Vector3d& getForce() const;

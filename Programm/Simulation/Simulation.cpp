@@ -541,10 +541,12 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 	Real damperFactor = 1 - damper;
 	
 	bool dampingJoint = false;
+	
 
 	while (maxError > acceptedError && n <= maxIterations)
 	{
 		dampingJoint = true;
+		/*
 		for each (RigidBody *rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 		{
 			if (rigidBody->isStatic())
@@ -565,6 +567,7 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 
 			rigidBody->resetImpulse();
 		}
+		*/
 
 		if (n >= maxIterations)
 			printf("error: %f \n", maxError);
@@ -583,6 +586,8 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 			rigidBody->setVelocity(rigidBody->getVelocity() *damperFactor);
 		}
 	}
+
+	computeVeloctyCorrection();
 	
 }
 
@@ -630,17 +635,22 @@ void Simulation::computeImpulse()
 	
 	for each (RigidBody * rigidBody in  SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
-		if (rigidBody->isStatic())
-			continue;
-
-		rigidBody->setVelocity(rigidBody->getVelocity() + ((1.0 / rigidBody->getMass()) * rigidBody->getImpulse()));
-		rigidBody->setAngulaVelocity(((rigidBody->getAngulaVelocity()) + (rigidBody->getTorqueImpulse())));
-
-		rigidBody->resetImpulse();
-		//getInvertedInertiaTensor(invertedInertiaTensor);
-		//setAngulaVelocity(angulaVelocity + (invertedInertiaTensor * (ras.cross(impulse))));
+		computeImpulse(rigidBody);
 	}
 	
+}
+
+void Simulation::computeImpulse(RigidBody * rigidBody)
+{
+	if (rigidBody->isStatic())
+		return;
+
+	rigidBody->setVelocity(rigidBody->getVelocity() + ((1.0 / rigidBody->getMass()) * rigidBody->getImpulse()));
+	rigidBody->setAngulaVelocity(((rigidBody->getAngulaVelocity()) + (rigidBody->getTorqueImpulse())));
+
+	rigidBody->resetImpulse();
+	//getInvertedInertiaTensor(invertedInertiaTensor);
+	//setAngulaVelocity(angulaVelocity + (invertedInertiaTensor * (ras.cross(impulse))));
 }
 
 
@@ -658,6 +668,10 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 	Vector3d tmp;
 	Vector3d impulse;
 	Real factor = 1.0 / h;
+
+	Quaterniond q;
+	Vector3d deltaVel;
+	Vector3d deltaAngularVel;
 
 	int i = 0;
 	for each (IJoint* joint in SimulationManager::getInstance()->getObjectManager().getJoints())
@@ -702,12 +716,124 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 			//rigidBodyB->setVelocity(rigidBodyB->getVelocity()*damper);
 			//rigidBodyB->setAngulaVelocity(rigidBodyB->getAngulaVelocity()*damper);				
 		}
+		
+		if (!rigidBodyA->isStatic())
+		{
+			deltaVel = (1.0 / rigidBodyA->getMass() * rigidBodyA->getImpulse());
+			deltaAngularVel = rigidBodyA->getTorqueImpulse();
+
+			//compute the impulse for the Rigidbody
+			rigidBodyA->setVelocity(rigidBodyA->getVelocity() + deltaVel);
+			rigidBodyA->setAngulaVelocity(rigidBodyA->getAngulaVelocity() + deltaAngularVel);
+
+			//set new values
+			rigidBodyA->setPosition(rigidBodyA->getPosition() + (h* deltaVel));
+			calculateQdot(rigidBodyA->getRotation(), deltaAngularVel, q);
+			scaleQuaternion(h, q, q);
+			addQuaternions(rigidBodyA->getRotation(), q, q);
+			rigidBodyA->setRotation(q.normalized());
+
+			rigidBodyA->resetImpulse();
+		}
+
+		if (!rigidBodyB->isStatic())
+		{
+			deltaVel = (1.0 / rigidBodyB->getMass() * rigidBodyB->getImpulse());
+			deltaAngularVel = rigidBodyB->getTorqueImpulse();
+
+			//compute the impulse for the Rigidbody
+			rigidBodyB->setVelocity(rigidBodyB->getVelocity() + deltaVel);
+			rigidBodyB->setAngulaVelocity(rigidBodyB->getAngulaVelocity() + deltaAngularVel);
+
+			//set new values
+			rigidBodyB->setPosition(rigidBodyB->getPosition() + (h* deltaVel));
+			calculateQdot(rigidBodyB->getRotation(), deltaAngularVel, q);
+			scaleQuaternion(h, q, q);
+			addQuaternions(rigidBodyB->getRotation(), q, q);
+			rigidBodyB->setRotation(q.normalized());
+
+			rigidBodyB->resetImpulse();
+		}
+			
+		
 
 
 		i++;
 
 	}
 	
+}
+
+
+void Simulation::computeVeloctyCorrection()
+{
+	std::vector < Matrix3d* > kInverses;
+	setUpKInverse(kInverses);
+	Matrix3d *kInverse;
+	Vector3d impulse;
+	Vector3d tmpVector;
+	Vector3d u_a;
+	Vector3d u_b;
+
+	int i;
+	int maxIteration = 100;
+	double acceptedError =  0.00001;
+	
+	double maxError = 0;
+	double currentError;
+
+	int iteration = 0;
+	
+
+	do
+	{
+		maxError = 0;
+		i = 0;
+		for each (IJoint* joint in SimulationManager::getInstance()->getObjectManager().getJoints())
+		{
+			kInverse = kInverses[i];
+			
+			joint->getRas(tmpVector);
+			joint->getRigidBodyA()->getVelocityOfLocalPoint(tmpVector,u_a);
+			joint->getRbs(tmpVector);
+			joint->getRigidBodyB()->getVelocityOfLocalPoint(tmpVector, u_b);
+		
+			impulse = (*kInverse) * (u_a - u_b);
+			
+			currentError = abs(impulse.norm());
+			//printf("currentError: %f \n", currentError);
+			if (currentError > maxError)
+				maxError = currentError;
+
+			joint->getRas(tmpVector);
+			joint->getRigidBodyA()->addRasImpuls(impulse*-1, tmpVector);
+
+			joint->getRbs(tmpVector);
+			joint->getRigidBodyB()->addRasImpuls(impulse*1, tmpVector);
+
+			computeImpulse(joint->getRigidBodyA());
+			computeImpulse(joint->getRigidBodyB());
+
+			i++;
+		}
+		/*
+		for each (RigidBody * rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+		{
+			computeImpulse(rigidBody);
+		}
+		*/
+		iteration++;
+	} while (maxError > acceptedError && iteration < maxIteration);
+
+	printf("interations for velocity correction: %i\n",iteration);
+	printf("Max Velocity Error: %f\n", maxError);
+
+	// clean up
+	for each (Matrix3d * matrix in kInverses)
+	{
+
+		delete matrix;
+	}
 }
 
 
