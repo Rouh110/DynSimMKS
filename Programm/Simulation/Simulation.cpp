@@ -6,7 +6,6 @@ using namespace IBDS;
 
 Simulation::Simulation()
 : approximationMethod(EXPLICIT_EULER),
-currentScene(TASK1),
 iterationCount(1)
 {
 }
@@ -27,15 +26,6 @@ Simulation::ApproximationMethod Simulation::getApproximationMethod()
 }
 
 
-void Simulation::setCurrentScene(CurrentScene scene)
-{
-	currentScene = scene;
-}
-
-Simulation::CurrentScene Simulation::getCurrentScene()
-{
-	return currentScene;
-}
 
 void Simulation::update(Real h)
 {

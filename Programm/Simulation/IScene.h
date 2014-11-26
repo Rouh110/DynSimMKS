@@ -1,9 +1,12 @@
 #pragma once
 #include "Common\Config.h"
-
+#include <string>
+using namespace std;
 /*Represents a Scene in the Simulator*/
 class IScene
 {
+protected:
+	string name = "DefaultScene";
 public:
 	IScene();
 	~IScene();
@@ -13,5 +16,8 @@ public:
 
 	/*Updates the scene*/
 	virtual void update(Real currentTime){};
+
+	/* Returns the name of the scene.*/
+	virtual const string & getName(){ return name; };
 };
 

@@ -49,11 +49,15 @@ using namespace IBDS;
 using namespace Eigen;
 using namespace std;
 
-IScene *currentScene = 0;
+int currentSceneID = 0;
+vector<IScene*> scenes;
 void timeStep ();
 void buildModel ();
 void render ();
 void cleanup();
+void addScenes();
+void addScene(IScene* scene);
+
 
 
 void resetSim() {
@@ -69,29 +73,13 @@ void resetSim() {
 void TW_CALL setSceneCB(const void *value, void *clientData) {
 	// Set the new scene and reset the simulation
 	int integration = *(const int *)(value);
-	switch (integration) {
-	case 0:
-		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK1);
-		resetSim();
-		break;
-
-	case 1:
-		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK2);
-		resetSim();
-		break;
-	case 2:
-		SimulationManager::getInstance()->getSimulation().setCurrentScene(Simulation::TASK3);
-		resetSim();
-
-	default:
-		break;
-	}
+	currentSceneID = integration;
+	resetSim();
 }
 
 void TW_CALL getSceneCB(void *value, void *clientData) {
 	// Return the current scene
-	Simulation::CurrentScene scene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
-	*(int *)(value) = int(scene);
+	*(int *)(value) = currentSceneID;
 }
 
 void TW_CALL setApproximationCB(const void *value, void *clientData) {
@@ -136,6 +124,11 @@ void TW_CALL resetCamBTN(void *clientData) {
 	MiniGL::setViewport(40.0f, 1.0f, 100.0f, Vector3d(0.0, 1.0, 10.0), Vector3d(0.0, 0.0, 0.0));
 }
 
+void addScene(IScene* scene)
+{
+	scenes.push_back(scene);
+}
+
 
 // main 
 int main( int argc, char **argv )
@@ -148,9 +141,19 @@ int main( int argc, char **argv )
 	MiniGL::initLights ();
 	MiniGL::setClientIdleFunc (50, timeStep);		
 
+	//add the all existing Scenes into the scenes List
+	addScenes();
+
 	// set tweakBar
+
 	// Scene Switch
-	TwEnumVal sceneEV[] = { { 0, "Task 1" }, { 1, "Task 2" }, {2,"Task 3"} };
+	TwEnumVal *sceneEV = new TwEnumVal[scenes.size()];
+	int i = 0;
+	for each (IScene* scene in scenes)
+	{
+		sceneEV[i] = { i, scene->getName().data() };
+		i++;
+	}
 	// Create a type for the enum sceneEV
 	TwType sceneType = TwDefineEnum("SceneType", sceneEV, 3);
 	TwAddVarCB(MiniGL::m_tweakBar, "Scene", sceneType, setSceneCB, getSceneCB, NULL, "");
@@ -167,16 +170,15 @@ int main( int argc, char **argv )
 	// Create reset button 
 	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSimBTN, NULL, "");
 	
-
-	buildModel ();
-
+	buildModel ();	
+	
 	MiniGL::setClientSceneFunc(render);			
 	MiniGL::setViewport (40.0f, 1.0f, 100.0f, Vector3d (0.0, 1.0, 10.0), Vector3d (0.0, 0.0, 0.0));
 
 	glutMainLoop ();	
 
 	cleanup ();
-
+	delete[] sceneEV;
 	USE_TIMESTEP_TIMING(printAverageTimes());
 	
 	return 0;
@@ -184,6 +186,14 @@ int main( int argc, char **argv )
 
 void cleanup()
 {
+	SimulationManager::getInstance()->getObjectManager().resetObjectManager();
+	//delete all scenes
+	for (std::vector<IScene*>::iterator it = scenes.begin(); it != scenes.end(); ++it)
+	{
+		delete (*it);
+	}
+	scenes.clear();
+
 	delete SimulationManager::getInstance();
 }
 
@@ -194,15 +204,20 @@ void timeStep ()
 	const Real h = tm->getTimeStepSize();
 
 	//update Simulation
-	if (currentScene != 0)
-	{
-		currentScene->update(tm->getTime());
-	}
+
+	scenes[currentSceneID]->update(tm->getTime());
 
 	SimulationManager::getInstance()->getSimulation().update(h);
 	tm->setTime(tm->getTime() + h);
 
 	STOP_TIMING_AVG;
+}
+
+void addScenes()
+{
+	addScene(new TestScene01());
+	addScene(new TestScene02());
+	addScene(new ImpulseTest());
 }
 
 void buildModel ()
@@ -212,35 +227,9 @@ void buildModel ()
 	//SimulationManager::getInstance()->getSimulation().setApproximationMethod(Simulation::RUNGE_KUTTA_4);
 	// Create simulation model
 	
-	// Get current scene
-	Simulation::CurrentScene currScene = SimulationManager::getInstance()->getSimulation().getCurrentScene();
-
-	// Init the current scene
-
-	if (currentScene == 0)
-	{
-		delete currentScene;
-	}
-
-	switch (currScene) {
-	case Simulation::TASK1:
-		currentScene = new TestScene01;
-		break;
-	case Simulation::TASK2:
-		currentScene = new TestScene02;
-		break;
-	case Simulation::TASK3:
-		currentScene = new ImpulseTest;
-		break;
-	default:
-		break;
-	}
-
-	if (currentScene != 0)
-	{
-		currentScene->initializeScene();
-	}
 	
+	// Init the current scene
+	scenes[currentSceneID]->initializeScene();
 
 }
 
