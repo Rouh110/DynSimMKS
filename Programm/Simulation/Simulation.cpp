@@ -559,13 +559,12 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 		}
 		*/
 
-		if (n >= maxIterations)
-			printf("error: %f \n", maxError);
-
 		computeAllJoint(h, inverseKs, acceptedError, maxError);
 
 		n++;
 	}
+
+	printf("position correction iteration: %i :: max error: %f\n", n, maxError);
 
 	dampingJoint = true;
 	if (dampingJoint)
@@ -663,6 +662,9 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 	Vector3d deltaVel;
 	Vector3d deltaAngularVel;
 
+	Vector3d vel;
+	Vector3d angvel;
+
 	int i = 0;
 	for each (IJoint* joint in SimulationManager::getInstance()->getObjectManager().getJoints())
 	{
@@ -689,6 +691,8 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 		// calculate impulse
 		impulse = (*inverseK)* (factor * error);
 
+		
+
 		if (!rigidBodyA->isStatic())
 		{
 			joint->getRas(tmp);
@@ -706,6 +710,8 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 			//rigidBodyB->setVelocity(rigidBodyB->getVelocity()*damper);
 			//rigidBodyB->setAngulaVelocity(rigidBodyB->getAngulaVelocity()*damper);				
 		}
+
+
 		
 		if (!rigidBodyA->isStatic())
 		{
@@ -725,7 +731,7 @@ void Simulation::computeAllJoint(Real h, const std::vector<Matrix3d*> &KInverses
 
 			rigidBodyA->resetImpulse();
 		}
-
+		
 		if (!rigidBodyB->isStatic())
 		{
 			deltaVel = (1.0 / rigidBodyB->getMass() * rigidBodyB->getImpulse());
@@ -766,7 +772,7 @@ void Simulation::computeVeloctyCorrection()
 	Vector3d u_b;
 
 	int i;
-	int maxIteration = 100;
+	int maxIteration = 1000;
 	double acceptedError =  0.00001;
 	
 	double maxError = 0;

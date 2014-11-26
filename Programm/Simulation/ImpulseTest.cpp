@@ -1,4 +1,6 @@
 #include "ImpulseTest.h"
+#include "SimulationManager.h"
+
 #include "Cube.h"
 #include "Gravity.h"
 #include "SphericalJoint.h"
@@ -8,6 +10,7 @@
 using namespace Eigen;
 ImpulseTest::ImpulseTest()
 {
+	name = "Impulse Test";
 }
 
 
@@ -15,53 +18,26 @@ ImpulseTest::~ImpulseTest()
 {
 }
 
-Cube * cube;
-bool done = false;
+
  void ImpulseTest::initializeScene()
 {
 	 
-	//done = false;
-	//cube = &Cube::create();
+	 next = false;
+	 timer = 0;
 	 
-	 Real y = 2;
+	 Real y = 0;
 
-	 Gravity::create();
-
-	 Cube & cube01 = Cube::create();
-	 cube01.setMass(0);
-	 cube01.setPosition(Vector3d(0, y, 0));
-	 Cube & cube02 = Cube::create();
-	 cube02.setPosition(Vector3d(1, y, 0));
-	 Cube & cube03 = Cube::create();
-	 cube03.setPosition(Vector3d(2, y, 0));
+	 cube01 = &Cube::create();
+	 cube01->setPosition(Vector3d(-2, 2.4+y, 0));
+	 cube02 = &Cube::create();
+	 cube02->setPosition(Vector3d(-2, 1.2+y, 0));
+	 cube03 = &Cube::create();
+	 cube03->setPosition(Vector3d(-2, y, 0));
 	 
-	 Cube & cube04 = Cube::create();
-	 cube04.setPosition(Vector3d(3, y, 0.5));
-	 Cube & cube05 = Cube::create();
-	 cube05.setPosition(Vector3d(4, y, 0));
-	 Cube & cube06 = Cube::create(2,0.5,0.5);
-	 cube06.setPosition(Vector3d(5, 1+y, 0));
-	 Cube & cube07 = Cube::create(2, 0.5, 0.5);
-	 cube07.setPosition(Vector3d(5, -1+y, 0));
-	 
-	 
-	 SphericalJoint &joint01 = SphericalJoint::create(&cube01, &cube02, Vector3d(0.5, -0.5+y, 0));
-	 SphericalJoint &joint02 = SphericalJoint::create(&cube02, &cube03, Vector3d(1.5, -0.5+y, 0.0));
-	 
-	 SphericalJoint &joint03 = SphericalJoint::create(&cube03, &cube04, Vector3d(2.5, -0.5+y, 0));
-	 SphericalJoint &joint04 = SphericalJoint::create(&cube04, &cube05, Vector3d(3.5, 0.0+y, 0));
-
-	 SphericalJoint &joint05 = SphericalJoint::create(&cube06, &cube05, Vector3d(4, 1+y, 0));
-	 SphericalJoint &joint06 = SphericalJoint::create(&cube07, &cube05, Vector3d(4, -1+y, 0));
-	 
-	 
-	 Cube & cube00 = Cube::create();
-	 cube00.setPosition(Vector3d(4, 1+y, 0));
-	 cube00.setMass(0);
-
-
-	 //Spring & spring01 = Spring::create();
-	 //spring01.setSuspensionPoints(Vector3d(0, 0, 0), &cube00, Vector3d(0, 0.5,0), &cube03);
+	 cube04 = &Cube::create();
+	 cube04->setPosition(Vector3d(-2, y-1.2, 0));
+	 cube05 = &Cube::create();
+	 cube05->setPosition(Vector3d(-2, y-2.4, 0));
 	 
 	 
 	 
@@ -79,14 +55,56 @@ bool done = false;
  
  void ImpulseTest::update(Real currentTime)
 {
-	
-	 /*if (!done && currentTime > 5)
+	 int timeFactor = 5;
+	 Real impulseStrength = 0.1;
+
+	 // set Timer
+	 if (timer < (int)(currentTime / timeFactor))
 	 {
-		 cube->addRasImpuls(Vector3d(-0.1,0.1,-0.1), Vector3d(-0.5,-0.5,-0.5));
-		 cube->addRasImpuls(Vector3d(0.1, -0.1, 0.1), Vector3d(0.5, 0.5, 0.5));
-		 printf("jooooo\n");
-		 done = true;
+		 timer++;
+		 next = true;
 	 }
-	 */
+		 
+	 if (next)
+	 {
+		 switch (timer)
+		 {
+		 case 1:
+			 cube01->addRasImpuls(Vector3d(impulseStrength, 0, 0), Vector3d(0, 0, 0));
+			 break;
+		 case 2:
+			 cube02->addRasImpuls(Vector3d(impulseStrength, 0, 0), Vector3d(-1, 1, 0));
+			 break;
+		 case 3:
+			 cube03->addRasImpuls(Vector3d(impulseStrength, 0, 0), Vector3d(-1, 1, 0));
+			 cube03->addRasImpuls(Vector3d(impulseStrength, 0, 0), Vector3d(-1, -1, 0));
+			 break;
+		 case 4:
+			 cube04->addRasImpuls(Vector3d(-impulseStrength, impulseStrength, -impulseStrength), Vector3d(-0.5, -0.5, -0.5));
+			 cube04->addRasImpuls(Vector3d(impulseStrength, -impulseStrength, impulseStrength), Vector3d(0.5, 0.5, 0.5));
+			 break;
+		 case 5:
+			 cube05->addRasImpuls(Vector3d(impulseStrength, 0, 0), Vector3d(-1, 1, 0));
+			 break;
+		 case 6:
+			 cube05->addRasImpuls(-2*Vector3d(impulseStrength, 0, 0), Vector3d(1, -1, 0));
+			 break;
+		 case 10:
+			// reset();
+			 break;
+		 }
+
+		 next = false;
+	 }
+	 
+	 
+
 	 
 }
+
+ void ImpulseTest::reset()
+ {
+	 //SimulationManager::getInstance()->getObjectManager().resetObjectManager();
+	 //initializeScene();
+	 
+ }

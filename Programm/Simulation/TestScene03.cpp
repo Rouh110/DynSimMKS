@@ -1,21 +1,16 @@
-#include "TestScene02.h"
-
+#include "TestScene03.h"
 #include "Sphere.h"
 #include "Gravity.h"
 #include "Cube.h"
 #include "Spring.h"
 
-TestScene02::TestScene02()
+TestScene03::TestScene03()
 {
-	name = "JumpingJack";
+	name = "jumpingJack02";
 }
 
 
-TestScene02::~TestScene02()
-{
-}
-
-void TestScene02::initializeScene()
+void TestScene03::initializeScene()
 {
 	Real damper = 10;
 	Real springConstant = 100;
@@ -26,13 +21,13 @@ void TestScene02::initializeScene()
 	point.setPosition(Vector3d(0, 4, 0));
 	point.setMass(0);
 	Sphere & head = Sphere::create(0.4);
-	head.setPosition(Vector3d(0,3,0));
+	head.setPosition(Vector3d(0, 3, 0));
 	Cube & shoulder = Cube::create(2, 0.5, 0.5);
 	shoulder.setPosition(Vector3d(0, 2.3, 0));
 	Cube & torso = Cube::create(1, 2, 0.5);
 	torso.setPosition(Vector3d(0, 1, 0));
 
-	Cube & rightArm = Cube::create(0.5,1,0.5);
+	Cube & rightArm = Cube::create(0.5, 1, 0.5);
 	rightArm.setPosition(Vector3d(0.8, 1.5, 0));
 
 	Cube & leftArm = Cube::create(0.5, 1, 0.5);
@@ -59,14 +54,14 @@ void TestScene02::initializeScene()
 
 	// Springs to connet
 
-	Spring & spring1 = Spring::create(damper, springConstant*2,1);
-	spring1.setSuspensionPoints( Vector3d(0, 0, 0),&point, Vector3d(0, 0.4, 0),&head);
+	Spring & spring1 = Spring::create(damper, springConstant * 2, 1);
+	spring1.setSuspensionPoints(Vector3d(0, 0, 0), &point, Vector3d(0, 0.4, 0), &head);
 
-	Spring & spring2 = Spring::create(damper*0.5, springConstant*10, 1);
+	Spring & spring2 = Spring::create(damper*0.5, springConstant * 10, 1);
 	spring2.setSuspensionPoints(Vector3d(0, -0.4, 0), &head, Vector3d(0, 0.25, 0), &shoulder);
 
 	Spring & spring3 = Spring::create(damper, springConstant, 1);
-	spring3.setSuspensionPoints(Vector3d(0.3,-0.25 , 0), &shoulder, Vector3d(0.3, 1, 0), &torso);
+	spring3.setSuspensionPoints(Vector3d(0.3, -0.25, 0), &shoulder, Vector3d(0.3, 1, 0), &torso);
 	Spring & spring4 = Spring::create(damper, springConstant, 1);
 	spring4.setSuspensionPoints(Vector3d(-0.3, -0.25, 0), &shoulder, Vector3d(-0.3, 1, 0), &torso);
 
@@ -94,4 +89,17 @@ void TestScene02::initializeScene()
 	Spring & spring12 = Spring::create(damper, springConstant, 1);
 	spring12.setSuspensionPoints(Vector3d(0.0, -0.5, 0), &leftUpperLeg, Vector3d(0, 0.5, 0), &leftShin);
 
+
+
+
+	// Pendular to make it interisting
+	Sphere &pendular = Sphere::create(0.2);
+	pendular.setPosition(Vector3d(1, 4, 3));
+
+	Spring & spring13 = Spring::create(damper, springConstant, 1);
+	spring13.setSuspensionPoints(Vector3d(0.0, -0.5, 0), &leftShin, Vector3d(0, 0, 0), &pendular);
+}
+
+TestScene03::~TestScene03()
+{
 }

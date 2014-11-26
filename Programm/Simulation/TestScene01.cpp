@@ -5,6 +5,7 @@
 #include "Sphere.h"
 TestScene01::TestScene01()
 {
+	this->name = "SpringTest";
 }
 
 

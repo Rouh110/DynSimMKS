@@ -37,7 +37,10 @@
 #include "Simulation/SimulationManager.h"
 #include "TestScene01.h"
 #include "TestScene02.h"
+#include "TestScene03.h"
 #include "ImpulseTest.h"
+#include "SceneMobile.h"
+#include "ScenePuppet.h"
 
 
 // Enable memory leak detection
@@ -57,6 +60,7 @@ void render ();
 void cleanup();
 void addScenes();
 void addScene(IScene* scene);
+void resetSim();
 
 
 
@@ -155,7 +159,7 @@ int main( int argc, char **argv )
 		i++;
 	}
 	// Create a type for the enum sceneEV
-	TwType sceneType = TwDefineEnum("SceneType", sceneEV, 3);
+	TwType sceneType = TwDefineEnum("SceneType", sceneEV, scenes.size());
 	TwAddVarCB(MiniGL::m_tweakBar, "Scene", sceneType, setSceneCB, getSceneCB, NULL, "");
 	// Approximation Switch
 	TwEnumVal approximationEV[] = { { 0, "Explicit Euler" }, { 1, "Runge Kutta 4" } };
@@ -217,7 +221,10 @@ void addScenes()
 {
 	addScene(new TestScene01());
 	addScene(new TestScene02());
+	addScene(new TestScene03());
 	addScene(new ImpulseTest());
+	addScene(new SceneMobile());
+	addScene(new ScenePuppet());
 }
 
 void buildModel ()
