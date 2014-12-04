@@ -48,6 +48,8 @@ ADD_EXECUTABLE(Simulation
 	  SceneMobile.h
 	  ScenePuppet.cpp
 	  ScenePuppet.h
+	  BoundingVolume.cpp
+	  BoundingVolume.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  
