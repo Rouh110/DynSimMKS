@@ -50,6 +50,10 @@ ADD_EXECUTABLE(Simulation
 	  ScenePuppet.h
 	  BoundingVolume.cpp
 	  BoundingVolume.h
+	  BoundingVolumeTree.cpp
+	  BoundingVolumeTree.h
+	  BoundingVolumeTreeNode.cpp
+	  BoundingVolumeTreeNode.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  
