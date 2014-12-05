@@ -15,13 +15,13 @@ public:
 	~BoundingVolumeTreeNode();
 
 	
-	bool isLeave();
-	bool isRoot();
+	bool isLeave() const;
+	bool isRoot() const;
 
-	BoundingVolume * getBoundingVolume();
-	BoundingVolumeTreeNode* getParent();
-	BoundingVolumeTreeNode* getChild(int i);
-	int numberOfChildren();
+	BoundingVolume * getBoundingVolume() const;
+	BoundingVolumeTreeNode* getParent() const;
+	BoundingVolumeTreeNode* getChild(int i) const;
+	int numberOfChildren() const;
 
 	void addChild(BoundingVolumeTreeNode*);
 	void setParent(BoundingVolumeTreeNode*);

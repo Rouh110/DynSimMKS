@@ -41,6 +41,7 @@
 #include "ImpulseTest.h"
 #include "SceneMobile.h"
 #include "ScenePuppet.h"
+#include <list>
 
 
 // Enable memory leak detection
@@ -54,6 +55,8 @@ using namespace std;
 
 int currentSceneID = 0;
 vector<IScene*> scenes;
+bool drawVolumes = true;
+int volumeDrawDepth = 3;
 void timeStep ();
 void buildModel ();
 void render ();
@@ -288,7 +291,56 @@ void render ()
 		joint->render();
 	}
 
+	if (drawVolumes)
+	{
+		int currentDepth = 0;
+		list<int> state;
+		const BoundingVolumeTreeNode* node;
+		BoundingVolume* volume;
+		for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+		{
+			state.push_back(0);
+			node = rigidBody->getVolumeTree()->getRoot();
+			currentDepth = 0;
+			while (state.size() > 0)
+			{
+				if (currentDepth == volumeDrawDepth || node->isLeave())
+				{
+					//Draw Volume
+					volume = node->getBoundingVolume();
+					MiniGL::drawSphere(&(rigidBody->toGlobalSpace(volume->m)),volume->r,MiniGL::gray);
+					//clime up the volume tree
+					node = node->getParent();
+					state.pop_back();
+					currentDepth--;
+					if (state.size() > 0)
+						state.back() = state.back() + 1;
+					
+				}
+				else if (state.back() >= node->numberOfChildren())
+				{
+					node = node->getParent();
+					state.pop_back();
+					currentDepth--;
+					if (state.size() > 0)
+						state.back() = state.back() + 1;
+					
+				}
+				else
+				{
+					node = node->getChild(state.back());
+					state.push_back(0);
+					currentDepth++;
+				}
+
+			}
+
+
+		}
+	}
+
 	MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());
 
 }
+
 
