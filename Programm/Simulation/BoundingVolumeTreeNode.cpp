@@ -11,6 +11,8 @@ BoundingVolumeTreeNode::BoundingVolumeTreeNode()
 
 BoundingVolumeTreeNode::~BoundingVolumeTreeNode()
 {
+	if (boundingVolume != 0)
+		delete boundingVolume;
 }
 
 bool BoundingVolumeTreeNode::isLeave()
@@ -51,4 +53,9 @@ void BoundingVolumeTreeNode::addChild(BoundingVolumeTreeNode* child)
 void BoundingVolumeTreeNode::setParent(BoundingVolumeTreeNode* parent)
 {
 	this->parent = parent;
+}
+
+void BoundingVolumeTreeNode::setBoundingVolume(BoundingVolume* boundingVolume)
+{
+	this->boundingVolume = boundingVolume;
 }

@@ -89,6 +89,11 @@ const Eigen::Vector3d& RigidBody::getTorqueImpulse() const
 	return torqueImpulse;
 }
 
+const BoundingVolumeTree* RigidBody::getVolumeTree() const
+{
+	return &(this->volumeTree);
+}
+
 
 void RigidBody::setMass(Real mass)
 {

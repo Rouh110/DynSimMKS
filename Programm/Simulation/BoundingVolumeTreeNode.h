@@ -25,6 +25,7 @@ public:
 
 	void addChild(BoundingVolumeTreeNode*);
 	void setParent(BoundingVolumeTreeNode*);
+	void setBoundingVolume(BoundingVolume* boundingVolume);
 
 
 

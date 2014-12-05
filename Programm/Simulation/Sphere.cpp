@@ -6,6 +6,7 @@ Sphere::Sphere(Real radius)
 radius(radius)
 {
 	calculateTensor();
+	initializeVolumeTree();
 }
 
 
@@ -40,4 +41,12 @@ Sphere & Sphere::create(Real radius)
 	Sphere * sphere = new Sphere(radius);
 	sphere->addToObjectManager();
 	return *sphere;
+}
+
+void Sphere::initializeVolumeTree()
+{
+	BoundingVolumeTreeNode * root = new BoundingVolumeTreeNode();
+	volumeTree.setRoot(root);
+
+	root->setBoundingVolume(new BoundingVolume(Eigen::Vector3d(0,0,0),radius));
 }

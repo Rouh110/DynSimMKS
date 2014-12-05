@@ -2,6 +2,7 @@
 
 #include "Common/Config.h"
 #include <Eigen/Dense>
+#include "BoundingVolumeTree.h"
 
 
 /*
@@ -22,7 +23,7 @@ protected:
 	Eigen::Vector3d force;
 	Eigen::Vector3d impulse;
 	Eigen::Vector3d torqueImpulse;
-	
+	BoundingVolumeTree volumeTree;
 public:
 	RigidBody();
 	~RigidBody();
@@ -45,6 +46,8 @@ public:
 	const Eigen::Vector3d& getImpulse() const;
 	const Eigen::Vector3d& getTorqueImpulse() const;
 	
+	const BoundingVolumeTree* getVolumeTree() const;
+
 	/*
 	Sets the mass. The Rigidbody will be static if the mass is 0.
 	*/
@@ -95,6 +98,10 @@ protected:
 	void addToObjectManager();
 	/*Calulates and sets the inertiaTensor and the inverted inertia tensor of the RigidBody. */
 	virtual void calculateTensor() = 0;
+
+	virtual void initializeVolumeTree() = 0;
+
+	virtual int getMaxTreeDepth(){ return 2; };
 
 };
 
