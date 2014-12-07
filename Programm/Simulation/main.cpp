@@ -55,8 +55,8 @@ using namespace std;
 
 int currentSceneID = 0;
 vector<IScene*> scenes;
-bool drawVolumes = true;
-int volumeDrawDepth = 3;
+bool drawVolumes = false;
+int volumeDrawDepth = 0;
 void timeStep ();
 void buildModel ();
 void render ();
