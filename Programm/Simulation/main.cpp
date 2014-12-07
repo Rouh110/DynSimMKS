@@ -121,6 +121,28 @@ void TW_CALL getTimeStepCB(void *value, void *clientData) {
 	*(float *)(value) = float(timeStep);
 }
 
+void TW_CALL setTreeDepthCB(const void *value, void *clientData) {
+	// Set the new time step value
+	int _volumeDrawDepth = *(const int *)(value);
+	volumeDrawDepth = _volumeDrawDepth;
+}
+void TW_CALL getTreeDepthCB(void *value, void *clientData) {
+	// Get the current time step value
+	int _volumeDrawDepth = volumeDrawDepth;
+	*(int *)(value) = int(_volumeDrawDepth);
+}
+
+void TW_CALL setTreeDrawCB(const void *value, void *clientData) {
+	// Set the new time step value
+	bool _drawVolumes = *(const bool *)(value);
+	drawVolumes = _drawVolumes;
+}
+void TW_CALL getTreeDrawCB(void *value, void *clientData) {
+	// Get the current time step value
+	bool _drawVolumes = drawVolumes;
+	*(bool *)(value) = bool(_drawVolumes);
+}
+
 void TW_CALL resetSimBTN(void *clientData) {
 	// Call rest sim function
 	resetSim();
@@ -176,7 +198,12 @@ int main( int argc, char **argv )
 	TwAddButton(MiniGL::m_tweakBar, "Reset Camera", resetCamBTN, NULL, "");
 	// Create reset button 
 	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSimBTN, NULL, "");
-	
+
+	// Set Tree Depth
+	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, "min=0 step=1");
+	// Set Tree Drawn
+	TwAddVarCB(MiniGL::m_tweakBar, "Tree Draw", TW_TYPE_BOOL32, setTreeDrawCB, getTreeDrawCB, NULL, "");
+
 	buildModel ();	
 	
 	MiniGL::setClientSceneFunc(render);			
