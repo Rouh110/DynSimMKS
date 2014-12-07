@@ -200,7 +200,7 @@ int main( int argc, char **argv )
 	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSimBTN, NULL, "");
 
 	// Set Tree Depth
-	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, "min=0 step=1");
+	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, "min=0 max=6 step=1");
 	// Set Tree Drawn
 	TwAddVarCB(MiniGL::m_tweakBar, "Tree Draw", TW_TYPE_BOOL32, setTreeDrawCB, getTreeDrawCB, NULL, "");
 
