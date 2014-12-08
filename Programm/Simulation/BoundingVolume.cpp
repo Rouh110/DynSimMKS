@@ -5,6 +5,8 @@ BoundingVolume::BoundingVolume(Eigen::Vector3d mRef, double rRef)
 {
 	m = mRef;
 	r = rRef;
+	contactPoint = Eigen::Vector3d(0, 0, 0);
+	contactNormal = Eigen::Vector3d(0, 0, 0);
 }
 
 
@@ -23,15 +25,15 @@ bool BoundingVolume::collisionTest(BoundingVolume* testVolume){
 	return false;
 }
 
-void BoundingVolume::collisionCalc(BoundingVolume* testVolume, Eigen::Vector3d contactNormal, Eigen::Vector3d & a, Eigen::Vector3d & b){
+void BoundingVolume::collisionCalc(BoundingVolume* testVolume){
 	double x = this->m.x() - testVolume->m.x();
 	double y = this->m.y() - testVolume->m.y();
 	double z = this->m.z() - testVolume->m.z();
 	double tmp = std::sqrt(pow(x,2) + pow(y,2) + pow(z,2));
 	
 	contactNormal = (this->m - testVolume->m)/tmp;
-	a = this->m - this->r * contactNormal;
-	b = testVolume->m - testVolume->r * contactNormal;
+	contactPoint = this->m - this->r * contactNormal;
+	testVolume->contactPoint = testVolume->m - testVolume->r * contactNormal;
 }
 bool BoundingVolume::collisionTestYAxis(){
 	if ((this->m.y() - this->r) <= 0){
@@ -39,7 +41,7 @@ bool BoundingVolume::collisionTestYAxis(){
 	}
 	return false;
 }
-void BoundingVolume::collisionCalcYAxis(Eigen::Vector3d contactNormal, Eigen::Vector3d & a){
+void BoundingVolume::collisionCalcYAxis(){
 	contactNormal = Eigen::Vector3d(0, 1, 0);
-	a = this->m - this->r * contactNormal;
+	contactPoint = this->m - this->r * contactNormal;
 }

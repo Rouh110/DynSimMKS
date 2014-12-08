@@ -8,9 +8,11 @@ public:
 	~BoundingVolume();
 	Eigen::Vector3d m;
 	double r;
+	Eigen::Vector3d contactPoint;
+	Eigen::Vector3d contactNormal;
 	bool collisionTestYAxis();
 	bool collisionTest(BoundingVolume* testVolume);
-	void collisionCalc(BoundingVolume* testVolume, Eigen::Vector3d contactNormal, Eigen::Vector3d & a, Eigen::Vector3d & b);
-	void collisionCalcYAxis(Eigen::Vector3d contactNormal, Eigen::Vector3d & a);
+	void collisionCalc(BoundingVolume* testVolume);
+	void collisionCalcYAxis();
 };
 

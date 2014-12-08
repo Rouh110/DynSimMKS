@@ -50,3 +50,7 @@ void Sphere::initializeVolumeTree()
 
 	root->setBoundingVolume(new BoundingVolume(Eigen::Vector3d(0,0,0),radius));
 }
+void Sphere::drawContact(MiniGL gl){
+	BoundingVolume* root = volumeTree.getRoot()->getBoundingVolume();
+	
+}

@@ -2,7 +2,8 @@
 
 #include "Simulation/RigidBody.h"
 #include "Common/Config.h"
-
+#include "Visualization/MiniGL.h"
+#include "GL/glut.h"
 /*Represents a sphere.*/
 class Sphere : public  RigidBody
 {
@@ -22,7 +23,7 @@ public:
 protected:
 	/*calculates and sets the inertia and inverted inertia tensor.*/
 	void calculateTensor();
-
+	void drawContact(MiniGL gl);
 	void initializeVolumeTree();
 };
 

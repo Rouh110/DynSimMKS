@@ -260,6 +260,7 @@ void render ()
 			pos = c->getPosition();
 			//c->setRotation(q);
 			//c->setPosition(Vector3d(i,0,0));
+			
 			MiniGL::drawCube(&pos, &(c->getRotation().inverse().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
 		}
 		else
@@ -270,7 +271,7 @@ void render ()
 			{
 				
 				pos = s->getPosition();
-			
+				
 				MiniGL::drawSphere(&pos, s->getRadius(), MiniGL::red);
 			}
 
