@@ -5,6 +5,7 @@ Sphere::Sphere(Real radius)
 :
 radius(radius)
 {
+	contactNormal = Eigen::Vector3d(0, 0, 0);
 	calculateTensor();
 }
 

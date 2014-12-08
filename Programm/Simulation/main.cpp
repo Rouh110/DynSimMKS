@@ -39,6 +39,7 @@
 #include "TestScene02.h"
 #include "TestScene03.h"
 #include "ImpulseTest.h"
+#include "SceneBoundingVolume.h"
 #include "SceneMobile.h"
 #include "ScenePuppet.h"
 
@@ -225,6 +226,7 @@ void addScenes()
 	addScene(new ImpulseTest());
 	addScene(new SceneMobile());
 	addScene(new ScenePuppet());
+	addScene(new SceneBoundingVolume());
 }
 
 void buildModel ()
@@ -250,11 +252,12 @@ void render ()
 	Vector3d pos;	
 	Cube *c;
 	Sphere *s;
-	
+	//MiniGL::drawVector(Vector3d(0, 0, 0), Vector3d(1, 1, 1), 1, MiniGL::black);
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
 		c = dynamic_cast<Cube*>(rigidBody);
 		//c = (Cube*)(rigidBody);
+		
 		if (c != 0)
 		{
 			pos = c->getPosition();
@@ -272,6 +275,8 @@ void render ()
 				pos = s->getPosition();
 			
 				MiniGL::drawSphere(&pos, s->getRadius(), MiniGL::red);
+				std::cout << "Vektor Normal " << s->contactNormal << "\n" << std::flush;
+				MiniGL::drawVector(s->contactNormal, s->contactNormal * -5, 1, MiniGL::black);
 			}
 
 		}

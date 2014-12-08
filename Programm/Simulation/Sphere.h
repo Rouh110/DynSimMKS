@@ -2,20 +2,19 @@
 
 #include "Simulation/RigidBody.h"
 #include "Common/Config.h"
-
+#include <Eigen/Dense>
 /*Represents a sphere.*/
 class Sphere : public  RigidBody
 {
 private:
 	Real radius;
 public:
-	
 	Sphere(Real radius);
 	~Sphere();
-
+	Eigen::Vector3d contactNormal;
 	/*Returns the radius of the sphere.*/
 	Real getRadius() const;
-
+	
 	/*Creates a sphere with the given radius and adds it to the ObjectManager.
 	Returns a Referenze to the created sphere.*/
 	static Sphere & create(Real radius = 1);

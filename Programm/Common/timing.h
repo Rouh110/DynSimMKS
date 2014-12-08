@@ -80,7 +80,7 @@ FORCE_INLINE double stopTiming(bool print=true)
 		Timing::m_timingStack.pop();
 		const double t = (1000.0 * (stop.QuadPart - h.start.QuadPart)/(double)Timing::freq.QuadPart);
 		if (print && !Timing::m_dontPrintTimes)
-			std::cout << "time " << h.name.c_str() << ": " << t << " ms\n" << std::flush;
+			//std::cout << "time " << h.name.c_str() << ": " << t << " ms\n" << std::flush;
 		return t;
 	}
 	return 0;
