@@ -12,34 +12,39 @@ BoundingVolumeTreeNode::BoundingVolumeTreeNode()
 BoundingVolumeTreeNode::~BoundingVolumeTreeNode()
 {
 	if (boundingVolume != 0)
+	{
 		delete boundingVolume;
+	}
+		
+
+	boundingVolume = 0;
 }
 
-bool BoundingVolumeTreeNode::isLeave()
+bool BoundingVolumeTreeNode::isLeave() const
 {
 	return children.size() == 0;
 }
 
-bool BoundingVolumeTreeNode::isRoot()
+bool BoundingVolumeTreeNode::isRoot() const
 {
 	return parent == 0;
 }
 
-BoundingVolume * BoundingVolumeTreeNode::getBoundingVolume()
+BoundingVolume * BoundingVolumeTreeNode::getBoundingVolume() const
 {
 	return boundingVolume;
 }
-BoundingVolumeTreeNode* BoundingVolumeTreeNode::getParent()
+BoundingVolumeTreeNode* BoundingVolumeTreeNode::getParent() const
 {
 	return parent;
 }
 
-BoundingVolumeTreeNode* BoundingVolumeTreeNode::getChild(int i)
+BoundingVolumeTreeNode* BoundingVolumeTreeNode::getChild(int i) const
 {
 	return children[i];
 }
 
-int BoundingVolumeTreeNode::numberOfChildren()
+int BoundingVolumeTreeNode::numberOfChildren() const
 {
 	return children.size();
 }

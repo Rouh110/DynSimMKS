@@ -41,6 +41,7 @@
 #include "ImpulseTest.h"
 #include "SceneMobile.h"
 #include "ScenePuppet.h"
+#include <list>
 
 
 // Enable memory leak detection
@@ -54,6 +55,8 @@ using namespace std;
 
 int currentSceneID = 0;
 vector<IScene*> scenes;
+bool drawVolumes = false;
+int volumeDrawDepth = 0;
 void timeStep ();
 void buildModel ();
 void render ();
@@ -118,6 +121,28 @@ void TW_CALL getTimeStepCB(void *value, void *clientData) {
 	*(float *)(value) = float(timeStep);
 }
 
+void TW_CALL setTreeDepthCB(const void *value, void *clientData) {
+	// Set the new time step value
+	int _volumeDrawDepth = *(const int *)(value);
+	volumeDrawDepth = _volumeDrawDepth;
+}
+void TW_CALL getTreeDepthCB(void *value, void *clientData) {
+	// Get the current time step value
+	int _volumeDrawDepth = volumeDrawDepth;
+	*(int *)(value) = int(_volumeDrawDepth);
+}
+
+void TW_CALL setTreeDrawCB(const void *value, void *clientData) {
+	// Set the new time step value
+	bool _drawVolumes = *(const bool *)(value);
+	drawVolumes = _drawVolumes;
+}
+void TW_CALL getTreeDrawCB(void *value, void *clientData) {
+	// Get the current time step value
+	bool _drawVolumes = drawVolumes;
+	*(bool *)(value) = bool(_drawVolumes);
+}
+
 void TW_CALL resetSimBTN(void *clientData) {
 	// Call rest sim function
 	resetSim();
@@ -173,7 +198,12 @@ int main( int argc, char **argv )
 	TwAddButton(MiniGL::m_tweakBar, "Reset Camera", resetCamBTN, NULL, "");
 	// Create reset button 
 	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSimBTN, NULL, "");
-	
+
+	// Set Tree Depth
+	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, "min=0 max=6 step=1");
+	// Set Tree Drawn
+	TwAddVarCB(MiniGL::m_tweakBar, "Tree Draw", TW_TYPE_BOOL32, setTreeDrawCB, getTreeDrawCB, NULL, "");
+
 	buildModel ();	
 	
 	MiniGL::setClientSceneFunc(render);			
@@ -293,7 +323,56 @@ void render ()
 		joint->render();
 	}
 
+	if (drawVolumes)
+	{
+		int currentDepth = 0;
+		list<int> state;
+		const BoundingVolumeTreeNode* node;
+		BoundingVolume* volume;
+		for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+		{
+			state.push_back(0);
+			node = rigidBody->getVolumeTree()->getRoot();
+			currentDepth = 0;
+			while (state.size() > 0)
+			{
+				if (currentDepth == volumeDrawDepth || node->isLeave())
+				{
+					//Draw Volume
+					volume = node->getBoundingVolume();
+					MiniGL::drawSphere(&(rigidBody->toGlobalSpace(volume->m)),volume->r,MiniGL::gray);
+					//clime up the volume tree
+					node = node->getParent();
+					state.pop_back();
+					currentDepth--;
+					if (state.size() > 0)
+						state.back() = state.back() + 1;
+					
+				}
+				else if (state.back() >= node->numberOfChildren())
+				{
+					node = node->getParent();
+					state.pop_back();
+					currentDepth--;
+					if (state.size() > 0)
+						state.back() = state.back() + 1;
+					
+				}
+				else
+				{
+					node = node->getChild(state.back());
+					state.push_back(0);
+					currentDepth++;
+				}
+
+			}
+
+
+		}
+	}
+
 	MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());
 
 }
+
 

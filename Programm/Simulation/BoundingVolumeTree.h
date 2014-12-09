@@ -11,7 +11,7 @@ public:
 	BoundingVolumeTree();
 	~BoundingVolumeTree();
 
-	BoundingVolumeTreeNode* getRoot();
+	BoundingVolumeTreeNode* getRoot() const;
 	void setRoot(BoundingVolumeTreeNode* root);
 
 };

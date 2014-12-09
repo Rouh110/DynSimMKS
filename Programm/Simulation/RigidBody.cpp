@@ -165,6 +165,16 @@ void RigidBody::addTorqe(const Eigen::Vector3d & torque)
 	this->torque += torque;
 }
 
+Eigen::Vector3d RigidBody::toLocalSpace(const Eigen::Vector3d & point) const
+{
+	return rotation.inverse()._transformVector(point - position);
+}
+
+Eigen::Vector3d RigidBody::toGlobalSpace(const Eigen::Vector3d & point) const 
+{
+	return rotation._transformVector(point) + position;
+}
+
 void RigidBody::addToObjectManager()
 {
 	SimulationManager::getInstance()->getObjectManager().addObject(this);

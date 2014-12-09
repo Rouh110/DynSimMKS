@@ -1,5 +1,5 @@
 #include "BoundingVolumeTree.h"
-
+#include <list>
 
 BoundingVolumeTree::BoundingVolumeTree()
 	: root(0)
@@ -16,27 +16,28 @@ void BoundingVolumeTree::deleteTree()
 {
 	if (root != 0)
 	{
-		vector<int> state;
+		list<int> state;
 		BoundingVolumeTreeNode* node = root;
 		state.push_back(0);
 
-		while (state.size() != 0)
+		while (state.size() > 0)
 		{
-			if (state[state.size() - 1] < node->numberOfChildren())
+			if (state.back() < node->numberOfChildren())
 			{
+				node = node->getChild(state.back());
 				state.push_back(0);
-				node = node->getChild(state[state.size() - 1]);
 			}
 			else
 			{
 				state.pop_back();
+				BoundingVolumeTreeNode* tmpNode = node;
+				node = node->getParent();
+				delete tmpNode;
+
 				if (state.size() > 0)
 				{
-					state[state.size() - 1] = state[state.size() - 1] + 1;
-					node = node->getParent();
+					state.back() = state.back() + 1;
 				}
-				BoundingVolumeTreeNode* tmpNode = node;
-				delete tmpNode;
 			}
 		}
 	}
@@ -45,7 +46,7 @@ void BoundingVolumeTree::deleteTree()
 	root = 0;
 }
 
-BoundingVolumeTreeNode* BoundingVolumeTree::getRoot()
+BoundingVolumeTreeNode* BoundingVolumeTree::getRoot() const 
 {
 	return root;
 }

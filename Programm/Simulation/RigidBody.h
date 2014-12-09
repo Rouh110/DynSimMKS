@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include "BoundingVolumeTree.h"
 
+#define MAX_BOUNDINGVOLUME_DEPTH 6
 
 /*
 Represents an Rigidbody
@@ -91,7 +92,8 @@ public:
 	/*Sets the rotation of the RigidBody. The Rotation must be normalized !!!!*/
 	void setRotation(const Eigen::Quaterniond & rotation);
 
-	
+	Eigen::Vector3d toLocalSpace(const Eigen::Vector3d & point) const;
+	Eigen::Vector3d toGlobalSpace(const Eigen::Vector3d & point) const;
 
 protected:
 	/*adds the RigidBody to the ObjectManager*/
@@ -101,7 +103,7 @@ protected:
 
 	virtual void initializeVolumeTree() = 0;
 
-	virtual int getMaxTreeDepth(){ return 2; };
+	virtual int getMaxTreeDepth(){ return MAX_BOUNDINGVOLUME_DEPTH; };
 
 };
 
