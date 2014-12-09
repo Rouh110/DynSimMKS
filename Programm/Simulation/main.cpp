@@ -210,7 +210,7 @@ void timeStep ()
 	//update Simulation
 
 	scenes[currentSceneID]->update(tm->getTime());
-
+	
 	SimulationManager::getInstance()->getSimulation().update(h);
 	tm->setTime(tm->getTime() + h);
 
@@ -261,6 +261,9 @@ void render ()
 			//c->setRotation(q);
 			//c->setPosition(Vector3d(i,0,0));
 			
+			for each (BoundingVolumeTreeNode* node in c->getVolumeTree()){
+				MiniGL::drawVector(node->getBoundingVolume()->contactPoint, node->getBoundingVolume()->contactNormal, 2, MiniGL::black);
+			}
 			MiniGL::drawCube(&pos, &(c->getRotation().inverse().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
 		}
 		else
@@ -271,7 +274,8 @@ void render ()
 			{
 				
 				pos = s->getPosition();
-				
+				BoundingVolume * boundSphere = s->getVolumeTree()->getRoot()->getBoundingVolume();
+				MiniGL::drawVector(boundSphere->contactPoint, boundSphere->contactPoint, 2,MiniGL::black);
 				MiniGL::drawSphere(&pos, s->getRadius(), MiniGL::red);
 			}
 
