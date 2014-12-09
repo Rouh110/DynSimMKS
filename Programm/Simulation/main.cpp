@@ -285,7 +285,9 @@ void render ()
 	Vector3d pos;	
 	Cube *c;
 	Sphere *s;
-	
+	for each (BoundingVolume*  bv in SimulationManager::getInstance()->getSimulation().getCollidedBoundingVolumes()){
+		MiniGL::drawVector(bv->contactPoint, bv->contactNormal, 2, MiniGL::black);
+	}
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
 		c = dynamic_cast<Cube*>(rigidBody);
