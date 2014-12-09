@@ -37,6 +37,7 @@ void SceneBoundingVolume::update(Real currentTime)
 	Real impulseStrength = 0.1;
 	
 	// set Timer
+	/*
 	if (timer < (int)(currentTime / timeFactor))
 	{
 		timer++;
@@ -49,4 +50,5 @@ void SceneBoundingVolume::update(Real currentTime)
 		boundBouncingBall->contactPoint = Vector3d(0, 0, 0);
 		boundBouncingBall->contactNormal = Vector3d(0, 0, 0);
 	}
+	*/
 }

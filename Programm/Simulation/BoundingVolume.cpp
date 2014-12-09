@@ -14,10 +14,10 @@ BoundingVolume::~BoundingVolume()
 {
 }
 
-bool BoundingVolume::collisionTest(BoundingVolume* testVolume){
-	double x = this->m.x() - testVolume->m.x();
-	double y = this->m.y() - testVolume->m.y();
-	double z = this->m.z() - testVolume->m.z();
+bool BoundingVolume::collisionTest(const Eigen::Vector3d &globalPositionA, BoundingVolume* testVolume, const Eigen::Vector3d &globalPositionB){
+	double x = globalPositionA.x() - globalPositionB.x();
+	double y = globalPositionA.y() - globalPositionB.y();
+	double z = globalPositionA.z() - globalPositionB.z();
 	double tmp = pow(x, 2) + pow(y, 2) + pow(z, 2);
 	if(tmp <= pow(this->r+testVolume->r,2)){
 		return true;
@@ -25,23 +25,26 @@ bool BoundingVolume::collisionTest(BoundingVolume* testVolume){
 	return false;
 }
 
-void BoundingVolume::collisionCalc(BoundingVolume* testVolume){
-	double x = this->m.x() - testVolume->m.x();
-	double y = this->m.y() - testVolume->m.y();
-	double z = this->m.z() - testVolume->m.z();
+void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, BoundingVolume* testVolume, const Eigen::Vector3d &globalPositionB){
+	double x = globalPositionA.x() - globalPositionB.x();
+	double y = globalPositionA.y() - globalPositionB.y();
+	double z = globalPositionA.z() - globalPositionB.z();
 	double tmp = std::sqrt(pow(x,2) + pow(y,2) + pow(z,2));
 	
-	contactNormal = (this->m - testVolume->m)/tmp;
-	contactPoint = this->m - this->r * contactNormal;
-	testVolume->contactPoint = testVolume->m - testVolume->r * contactNormal;
+	contactNormal = (globalPositionA - globalPositionB) / tmp;
+	contactPoint = globalPositionA - this->r * contactNormal;
+	testVolume->contactPoint = globalPositionB - testVolume->r * contactNormal;
+	testVolume->contactNormal = contactNormal;
 }
-bool BoundingVolume::collisionTestYAxis(){
-	if ((this->m.y() - this->r) <= 0){
+
+bool BoundingVolume::collisionTestYAxis(const Eigen::Vector3d &globalPosition){
+	if ((globalPosition.y() - this->r) <= 0){
 		return true;
 	}
 	return false;
 }
-void BoundingVolume::collisionCalcYAxis(){
+
+void BoundingVolume::collisionCalcYAxis(const Eigen::Vector3d &globalPosition){
 	contactNormal = Eigen::Vector3d(0, 1, 0);
-	contactPoint = this->m - this->r * contactNormal;
+	contactPoint = globalPosition - this->r * contactNormal;
 }
