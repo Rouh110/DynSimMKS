@@ -45,6 +45,7 @@
 #include "SceneMobile.h"
 #include "ScenePuppet.h"
 #include "SceneBoundingVolumeTwo.h"
+#include "SceneCollisionTest01.h"
 #include <list>
 
 
@@ -260,6 +261,7 @@ void addScenes()
 	addScene(new SceneMobile());
 	addScene(new ScenePuppet());
 	addScene(new SceneBoundingVolumeTwo());
+	addScene(new SceneCollisionTest01());
 }
 
 void buildModel ()
@@ -286,8 +288,9 @@ void render ()
 	Cube *c;
 	Sphere *s;
 	for each (BoundingVolume*  bv in SimulationManager::getInstance()->getSimulation().getCollidedBoundingVolumes()){
-		MiniGL::drawVector(bv->contactPoint, bv->contactNormal, 2, MiniGL::black);
+		MiniGL::drawVector(bv->contactPoint, bv->contactPoint+bv->contactNormal, 2, MiniGL::black);
 	}
+
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
 		c = dynamic_cast<Cube*>(rigidBody);

@@ -58,6 +58,8 @@ ADD_EXECUTABLE(Simulation
 	  SceneBoundingVolumeTwo.h
 	  SceneBoundingVolume.cpp
 	  SceneBoundingVolumeTwo.cpp
+	  SceneCollisionTest01.cpp
+	  SceneCollisionTest01.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  
