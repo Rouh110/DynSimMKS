@@ -35,6 +35,9 @@
 #include "Simulation/Cube.h"
 #include "Simulation/Sphere.h"
 #include "Simulation/SimulationManager.h"
+#include "Simulation/BoundingVolume.h"
+#include "Simulation/BoundingVolumeTreeNode.h"
+#include "Simulation/BoundingVolumeTree.h"
 #include "TestScene01.h"
 #include "TestScene02.h"
 #include "TestScene03.h"
@@ -269,7 +272,16 @@ void buildModel ()
 	scenes[currentSceneID]->initializeScene();
 
 }
-
+void nextNode(BoundingVolumeTreeNode* node){
+	for (int i = 0; i < node->numberOfChildren; i++){
+		if (node->getChild(i)->isLeave){
+			MiniGL::drawVector(node->getBoundingVolume()->contactPoint, node->getBoundingVolume()->contactNormal, 2, MiniGL::black);
+		}
+		else{
+			nextNode(node);
+		}
+	}
+}
 double i = 0;
 void render ()
 {
@@ -290,10 +302,8 @@ void render ()
 			pos = c->getPosition();
 			//c->setRotation(q);
 			//c->setPosition(Vector3d(i,0,0));
-			
-			for each (BoundingVolumeTreeNode* node in c->getVolumeTree()){
-				MiniGL::drawVector(node->getBoundingVolume()->contactPoint, node->getBoundingVolume()->contactNormal, 2, MiniGL::black);
-			}
+			BoundingVolumeTreeNode* rootNode = c->getVolumeTree()->getRoot();
+			nextNode(rootNode);
 			MiniGL::drawCube(&pos, &(c->getRotation().inverse().toRotationMatrix()), c->getWidth(), c->getHeight(), c->getDepth(), MiniGL::cyan);
 		}
 		else
