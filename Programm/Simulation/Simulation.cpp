@@ -25,7 +25,10 @@ Simulation::ApproximationMethod Simulation::getApproximationMethod()
 	return approximationMethod;
 }
 
-
+const list<BoundingVolume*> & Simulation::getCollidedBoundingVolumes() const
+{
+	return collidedBoundingVolumes;
+}
 
 void Simulation::update(Real h)
 {

@@ -3,9 +3,10 @@
 #include "RigidBody.h"
 #include "Common\Config.h"
 #include <vector>
+#include <list>
 
 using namespace Eigen;
-
+using namespace std;
 /*
 Simulates all non-static RigidBodys
 */
@@ -16,6 +17,8 @@ public:
 protected:
 	ApproximationMethod approximationMethod;
 	unsigned int iterationCount;
+	list<BoundingVolume*> collidedBoundingVolumes;
+
 public:
 	Simulation();
 	~Simulation();
@@ -30,6 +33,8 @@ public:
 
 	/*Updates the Simualtion*/
 	void update(Real h);
+
+	const list<BoundingVolume*> & getCollidedBoundingVolumes() const;
 
 protected:
 	/*
