@@ -103,6 +103,9 @@ void RigidBody::setPosition(const Eigen::Vector3d &position)
 {
 	this->position = position;
 }
+void RigidBody::setVolumeTree(const BoundingVolumeTree &tree){
+	this->volumeTree = tree;
+}
 void RigidBody::setVelocity(const Eigen::Vector3d &velocity)
 {
 	this->velocity = velocity;

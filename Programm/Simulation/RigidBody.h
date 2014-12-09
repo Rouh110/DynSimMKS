@@ -48,7 +48,7 @@ public:
 	const Eigen::Vector3d& getTorqueImpulse() const;
 	
 	const BoundingVolumeTree* getVolumeTree() const;
-
+	void setVolumeTree(const BoundingVolumeTree &tree);
 	/*
 	Sets the mass. The Rigidbody will be static if the mass is 0.
 	*/

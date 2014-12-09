@@ -23,7 +23,12 @@ void SceneBoundingVolume::initializeScene(){
 	bouncingball = &Sphere::create(0.4);
 	bouncingball->setPosition(Eigen::Vector3d(0, 3, 0));
 	bouncingball->setMass(1);
-	boundBouncingBall = new BoundingVolume(Eigen::Vector3d(0,3,0), 0.4);	
+
+	boundBouncingBall = new BoundingVolume(Eigen::Vector3d(0, 3, 0), 0.4);
+	BoundingVolumeTree* tree = new BoundingVolumeTree();
+	BoundingVolumeTreeNode* node = new BoundingVolumeTreeNode();
+	node->setBoundingVolume(boundBouncingBall);
+	tree->setRoot(node);
 }
 void SceneBoundingVolume::update(Real currentTime)
 {
@@ -37,7 +42,10 @@ void SceneBoundingVolume::update(Real currentTime)
 	}
 	boundBouncingBall->m = bouncingball->getPosition();
 	if (boundBouncingBall->collisionTestYAxis()){
-		std::cout << "ConteactNormal axis " << boundBouncingBall->contactNormal << " \n" << std::flush;
 		boundBouncingBall->collisionCalcYAxis();
+	}
+	else{
+		boundBouncingBall->contactPoint = Vector3d(0, 0, 0);
+		boundBouncingBall->contactNormal = Vector3d(0, 0, 0);
 	}
 }

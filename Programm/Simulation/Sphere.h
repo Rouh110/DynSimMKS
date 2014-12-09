@@ -23,7 +23,6 @@ public:
 protected:
 	/*calculates and sets the inertia and inverted inertia tensor.*/
 	void calculateTensor();
-	void drawContact(MiniGL gl);
 	void initializeVolumeTree();
 };
 

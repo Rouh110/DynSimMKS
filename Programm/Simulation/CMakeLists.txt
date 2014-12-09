@@ -54,6 +54,10 @@ ADD_EXECUTABLE(Simulation
 	  BoundingVolumeTree.h
 	  BoundingVolumeTreeNode.cpp
 	  BoundingVolumeTreeNode.h
+	  SceneBoundingVolume.h
+	  SceneBoundingVolumeTwo.h
+	  SceneBoundingVolume.cpp
+	  SceneBoundingVolumeTwo.cpp
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  
