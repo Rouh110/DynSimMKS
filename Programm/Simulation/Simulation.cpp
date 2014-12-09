@@ -32,9 +32,6 @@ const list<BoundingVolume*> & Simulation::getCollidedBoundingVolumes() const
 
 void Simulation::update(Real h)
 {
-
-	
-
 	switch (approximationMethod)
 	{
 	case EXPLICIT_EULER:
@@ -46,10 +43,9 @@ void Simulation::update(Real h)
 	}
 
 	//simulateJointsPredictorCorrector(h);
-	
-
 	resetForces();
-	
+	checkCollision();
+
 }
 
 void Simulation::resetForces()
@@ -833,6 +829,141 @@ void Simulation::computeVeloctyCorrection()
 
 		delete matrix;
 	}
+}
+
+
+void Simulation::checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB)
+{
+	if (!rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->collisionTest(rigidBodyA->toGlobalSpace(rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->m), rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume(), rigidBodyB->toGlobalSpace(rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume()->m)))
+	{
+		return;
+	}
+
+	RigidBody* rigidA;
+	RigidBody* rigidB;
+
+	const BoundingVolumeTree *treeA;
+	const BoundingVolumeTree *treeB;
+	if (rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->r < rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume()->r)
+	{
+		treeA = rigidBodyA->getVolumeTree();
+		treeB = rigidBodyB->getVolumeTree(); 
+		rigidA = rigidBodyA;
+		rigidB = rigidBodyB;
+	}
+	else
+	{
+		treeA = rigidBodyB->getVolumeTree();
+		treeB = rigidBodyA->getVolumeTree();
+		rigidA = rigidBodyB;
+		rigidB = rigidBodyA;
+	}
+
+	list<int> stateA;
+	list<int> stateB;
+	BoundingVolumeTreeNode * nodeA = treeA->getRoot();
+	BoundingVolumeTreeNode * nodeB = treeB->getRoot();
+
+	stateA.push_back(0);
+	stateB.push_back(0);
+
+
+	while (true)
+	{
+		if (!nodeB->isLeave())
+		{
+			if (stateB.back() < nodeB->numberOfChildren())
+			{
+				if (nodeA->getBoundingVolume()->collisionTest(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getChild(stateB.back())->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getChild(stateB.back())->getBoundingVolume()->m)))
+				{
+					nodeB = nodeB->getChild(stateB.back());
+					stateB.push_back(0);
+					bool collide = false;
+					for (int i = stateA.back(); i < nodeA->numberOfChildren(); i++)
+					{
+						if (nodeA->getChild(stateA.back())->getBoundingVolume()->collisionTest(rigidA->toGlobalSpace(nodeA->getChild(stateA.back())->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m)))
+						{
+							collide = true;
+							stateA.back() = i;
+							nodeA = nodeA->getChild(i);
+							stateA.push_back(0);
+							break;
+						}
+					}
+
+					if (!collide)
+					{
+						stateA.back() = 0;
+						stateB.pop_back();
+						stateB.back() += 1;
+					}
+					
+				}
+				else
+				{
+					stateB.back() = stateB.back() + 1;
+				}
+			}
+			else
+			{
+				nodeB = nodeB->getParent();
+				nodeA = nodeA->getParent();
+
+				stateA.pop_back();
+				stateB.pop_back();
+
+				if (stateA.size() > 0)
+				{
+					stateA.back() += 1;
+					stateB.back() += 1;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			nodeA->getBoundingVolume()->collisionCalc(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m));
+		
+			collidedBoundingVolumes.push_back(nodeA->getBoundingVolume());
+			collidedBoundingVolumes.push_back(nodeB->getBoundingVolume());
+
+			nodeA = nodeA->getParent();
+			nodeB = nodeB->getParent();
+
+			stateA.pop_back();
+			stateB.pop_back();
+
+			if (stateA.size() > 0)
+			{
+				stateA.back() += 1;
+				stateB.back() += 1;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+
+}
+
+void Simulation::checkCollision()
+{
+	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
+	collidedBoundingVolumes.clear();
+	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+	{
+		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
+
+		for each (RigidBody* ridgedBodyB in rigidbodysToCheck)
+		{
+			checkCollision(ridgedBodyA, ridgedBodyB);
+		}
+	}	
 }
 
 

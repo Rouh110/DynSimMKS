@@ -115,5 +115,14 @@ protected:
 	/**/
 	void computeVeloctyCorrection();
 
+	void checkCollision();
+	void checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB);
+
+	/*
+	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
+	bool collisionTest(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
+	void collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
+	void collisionCalcYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
+	*/
 };
 

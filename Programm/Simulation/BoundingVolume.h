@@ -10,9 +10,9 @@ public:
 	double r;
 	Eigen::Vector3d contactPoint;
 	Eigen::Vector3d contactNormal;
-	bool collisionTestYAxis();
-	bool collisionTest(BoundingVolume* testVolume);
-	void collisionCalc(BoundingVolume* testVolume);
-	void collisionCalcYAxis();
+	bool collisionTestYAxis(const Eigen::Vector3d &globalPosition);
+	bool collisionTest(const Eigen::Vector3d &globalPositionA, BoundingVolume* testVolume, const Eigen::Vector3d &globalPositionB);
+	void collisionCalc(const Eigen::Vector3d &globalPositionA, BoundingVolume* testVolume, const Eigen::Vector3d &globalPositionB);
+	void collisionCalcYAxis(const Eigen::Vector3d &globalPosition);
 };
 
