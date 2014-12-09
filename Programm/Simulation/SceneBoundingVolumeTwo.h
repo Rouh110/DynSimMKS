@@ -7,18 +7,7 @@ class SceneBoundingVolumeTwo :
 {
 private:
 	int timer = 0;
-	BoundingVolume  *boundBouncingBall;
-	Sphere *bouncingball;
-	Sphere *bouncingballtwo;
-	Sphere *bouncingballthree;
-	Sphere *bouncingballfour;
-	Sphere *bouncingballfive;
 
-	Sphere *bouncingballsix;
-	Sphere *bouncingballseven;
-	Sphere *bouncingballeight;
-	Sphere *bouncingballnine;
-	Sphere *bouncingballten;
 
 
 public:

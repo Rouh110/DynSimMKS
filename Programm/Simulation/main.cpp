@@ -44,6 +44,7 @@
 #include "ImpulseTest.h"
 #include "SceneMobile.h"
 #include "ScenePuppet.h"
+#include "SceneBoundingVolumeTwo.h"
 #include <list>
 
 
@@ -258,6 +259,7 @@ void addScenes()
 	addScene(new ImpulseTest());
 	addScene(new SceneMobile());
 	addScene(new ScenePuppet());
+	addScene(new SceneBoundingVolumeTwo());
 }
 
 void buildModel ()
@@ -303,7 +305,6 @@ void render ()
 			
 			if (s != 0)
 			{
-				
 				pos = s->getPosition();
 				BoundingVolume * boundSphere = s->getVolumeTree()->getRoot()->getBoundingVolume();
 				MiniGL::drawVector(boundSphere->contactPoint, boundSphere->contactPoint, 2,MiniGL::black);

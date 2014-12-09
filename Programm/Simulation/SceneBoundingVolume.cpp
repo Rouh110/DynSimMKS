@@ -20,6 +20,7 @@ SceneBoundingVolume::~SceneBoundingVolume()
 void SceneBoundingVolume::initializeScene(){
 	timer = 0;
 	Gravity::create();
+
 	bouncingball = &Sphere::create(0.4);
 	bouncingball->setPosition(Eigen::Vector3d(0, 3, 0));
 	bouncingball->setMass(1);
