@@ -1,7 +1,7 @@
 #pragma once
-#include "C:\Users\mcburn_laptop\git\DynSimMKS\Programm\Simulation\IScene.h"
-#include "C:\Users\mcburn_laptop\git\DynSimMKS\Programm\Simulation\Sphere.h"
-#include "C:\Users\mcburn_laptop\git\DynSimMKS\Programm\Simulation\BoundingVolume.h"
+#include "Simulation\IScene.h"
+#include "Simulation\Sphere.h"
+#include "Simulation\BoundingVolume.h"
 class SceneBoundingVolumeTwo :
 	public IScene
 {
