@@ -1112,7 +1112,126 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 {
 	volumeA->collisionCalc(rigidBodyA->toGlobalSpace(volumeA->m), volumeB, rigidBodyB->toGlobalSpace(volumeB->m));
 
+
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);
+
+	// relic from the merge with commit  062c64037ef006416605299339dce43287ac9a97 [062c640]
+	/*
+	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
+	collidedBoundingVolumes.clear();
+	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+	{
+	checkCollisionWithYAxis(ridgedBodyA);
+
+	rigidbodysToCheck.erase(rigidbodysToCheck.begin());
+	*/
 }
 
+void Simulation::checkCollisionWithYAxis(RigidBody* rigidBody)
+{
+	// check root collision with Y axis
+	if (!rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->collisionTestYAxis(rigidBody->toGlobalSpace(rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->m)))
+	{
+		return;
+	}
+
+	//simplfy
+	// collision calc
+	rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->collisionCalcYAxis(rigidBody->toGlobalSpace(rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->m));
+
+	collidedBoundingVolumes.push_back(rigidBody->getVolumeTree()->getRoot()->getBoundingVolume());
+
+	/*
+	RigidBody* rigid;
+
+	const BoundingVolumeTree *tree;
+
+	tree = rigidBody->getVolumeTree();
+	rigid = rigidBody;
+	
+
+	list<int> state;
+	list<int> stateY;
+	BoundingVolumeTreeNode * node = tree->getRoot();
+
+	state.push_back(0);
+	stateY.push_back(-1);
+
+	while (true)
+	{
+		if (!node->isLeave())
+		{
+			bool collide = false;
+			if (state.back() > -1)
+			{
+				// check children of node A with child of nodeB
+				while (state.back() < node->numberOfChildren())
+				{
+					collide = node->getChild(state.back())->getBoundingVolume()->collisionTestYAxis(rigid->toGlobalSpace(node->getChild(state.back())->getBoundingVolume()->m));
+					if (collide)
+					{
+						// go down
+						node = node->getChild(state.back());
+						state.push_back(-1);
+						stateY.push_back(0);
+						break;
+					}
+					state.back() += 1;
+				}
+
+				if (!collide)
+				{
+					// switch mode
+					state.back() = -1;
+					stateY.back() += 1;
+				}
+
+			}
+			else
+			{
+				// go up
+				node = node->getParent();
+				state.pop_back();
+				stateY.pop_back();
+
+				if (state.size() > 0)
+				{
+					state.back() += 1;
+					//stateB.back += 1;
+				}
+				else
+				{
+					// finnished
+					break;
+				}
+			}
+		}
+		else // in Leafe
+		{
+			// collision calc
+			node->getBoundingVolume()->collisionCalcYAxis(rigid->toGlobalSpace(node->getBoundingVolume()->m));
+
+			collidedBoundingVolumes.push_back(node->getBoundingVolume());
+
+			// go up
+			node = node->getParent();
+
+			state.pop_back();
+			stateY.pop_back();
+
+			if (state.size() > 0)
+			{
+				state.back() += 1;
+				//stateB.back() = stateB.back() + 1;
+			}
+			else
+			{
+				// finnished
+				break;
+			}
+		}
+	}
+	*/
+
+}

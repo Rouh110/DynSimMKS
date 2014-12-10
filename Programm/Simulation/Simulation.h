@@ -123,6 +123,8 @@ protected:
 	void checkCollision(Sphere* sphere, Cube* cube);
 
 	void collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
+	
+	void checkCollisionWithYAxis(RigidBody* rigidBody);
 
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);

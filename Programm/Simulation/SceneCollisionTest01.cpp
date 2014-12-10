@@ -25,4 +25,5 @@ void SceneCollisionTest01::initializeScene()
 	cube03.setPosition(Eigen::Vector3d(0, 2, 0));
 	Sphere &sphere01 = Sphere::create(0.5);
 	sphere01.setPosition(Eigen::Vector3d(0.9, 2, 0));
+
 }
