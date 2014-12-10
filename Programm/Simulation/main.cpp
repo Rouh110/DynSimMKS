@@ -319,7 +319,13 @@ void render ()
 	Sphere *s;
 	if (drawCollisionVectors){
 		for each (BoundingVolume*  bv in SimulationManager::getInstance()->getSimulation().getCollidedBoundingVolumes()){
-			MiniGL::drawVector(bv->contactPoint, bv->contactPoint + bv->contactNormal, 2, MiniGL::black);
+			while (!bv->contactNormals.empty() && !bv->contactPoints.empty()){
+				MiniGL::drawVector(bv->contactPoints.back(), bv->contactPoints.back() + bv->contactNormals.back(), 2, MiniGL::black);
+				bv->contactNormals.pop_back();
+				bv->contactPoints.pop_back();
+			}
+			bv->contactNormals.clear();
+			bv->contactPoints.clear();
 		}
 	}
 
@@ -343,7 +349,13 @@ void render ()
 				pos = s->getPosition();
 				BoundingVolume * boundSphere = s->getVolumeTree()->getRoot()->getBoundingVolume();
 				if (drawCollisionVectors){
-					MiniGL::drawVector(boundSphere->contactPoint, boundSphere->contactPoint, 2, MiniGL::black);
+					while (!boundSphere->contactNormals.empty() || !boundSphere->contactPoints.empty()){
+						MiniGL::drawVector(boundSphere->contactPoints.back(), boundSphere->contactPoints.back() + boundSphere->contactNormals.back(), 2, MiniGL::black);
+						boundSphere->contactNormals.pop_back();
+						boundSphere->contactPoints.pop_back();
+					}
+					boundSphere->contactNormals.clear();
+					boundSphere->contactPoints.clear();
 				}
 				MiniGL::drawSphere(&pos, s->getRadius(), MiniGL::red);
 			}
