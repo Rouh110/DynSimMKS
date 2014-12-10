@@ -846,6 +846,8 @@ void Simulation::checkCollision()
 	{
 		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
 
+		checkCollisionWithYAxis(ridgedBodyA);
+
 		cubeA = dynamic_cast<Cube*>(ridgedBodyA);
 		sphereA = dynamic_cast<Sphere*>(ridgedBodyA);
 
