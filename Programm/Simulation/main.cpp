@@ -152,7 +152,8 @@ void TW_CALL getTreeDrawCB(void *value, void *clientData) {
 void TW_CALL setCollisionDrawCB(const void *value, void *clientData) {
 	// Set the new time step value
 	bool _drawCollision = *(const bool *)(value);
-	drawCollisionVectors = _drawCollision;
+	if (SimulationManager::getInstance()->getSimulation().getCollisionCheck())
+		drawCollisionVectors = _drawCollision;
 }
 void TW_CALL getCollisionDrawCB(void *value, void *clientData) {
 	// Get the current time step value
