@@ -1133,107 +1133,75 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 void Simulation::checkCollisionWithYAxis(RigidBody* rigidBody)
 {
 	// check root collision with Y axis
+	BoundingVolumeTreeNode * cubeNode = rigidBody->getVolumeTree()->getRoot();
+
 	if (!rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->collisionTestYAxis(rigidBody->toGlobalSpace(rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->m)))
 	{
 		return;
 	}
 
-	//simplfy
-	// collision calc
-	rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->collisionCalcYAxis(rigidBody->toGlobalSpace(rigidBody->getVolumeTree()->getRoot()->getBoundingVolume()->m));
-
-	collidedBoundingVolumes.push_back(rigidBody->getVolumeTree()->getRoot()->getBoundingVolume());
-
-	/*
-	RigidBody* rigid;
-
-	const BoundingVolumeTree *tree;
-
-	tree = rigidBody->getVolumeTree();
-	rigid = rigidBody;
-	
-
 	list<int> state;
-	list<int> stateY;
-	BoundingVolumeTreeNode * node = tree->getRoot();
-
 	state.push_back(0);
-	stateY.push_back(-1);
 
+	
 	while (true)
 	{
-		if (!node->isLeave())
+		if (!cubeNode->isLeave())
 		{
 			bool collide = false;
-			if (state.back() > -1)
+
+			// find a child with collition
+			BoundingVolumeTreeNode *child;
+			while (state.back() < cubeNode->numberOfChildren())
 			{
-				// check children of node A with child of nodeB
-				while (state.back() < node->numberOfChildren())
+				child = cubeNode->getChild(state.back());
+				collide = cubeNode->getChild(state.back())->getBoundingVolume()->collisionTestYAxis(rigidBody->toGlobalSpace(cubeNode->getChild(state.back())->getBoundingVolume()->m));
+				if (collide)
 				{
-					collide = node->getChild(state.back())->getBoundingVolume()->collisionTestYAxis(rigid->toGlobalSpace(node->getChild(state.back())->getBoundingVolume()->m));
-					if (collide)
-					{
-						// go down
-						node = node->getChild(state.back());
-						state.push_back(-1);
-						stateY.push_back(0);
-						break;
-					}
-					state.back() += 1;
+					// go down
+					cubeNode = child;
+					state.push_back(0);
+					break;
 				}
 
-				if (!collide)
-				{
-					// switch mode
-					state.back() = -1;
-					stateY.back() += 1;
-				}
-
+				state.back() += 1;
 			}
-			else
+
+			if (!collide)
 			{
 				// go up
-				node = node->getParent();
+				cubeNode = cubeNode->getParent();
 				state.pop_back();
-				stateY.pop_back();
-
 				if (state.size() > 0)
 				{
 					state.back() += 1;
-					//stateB.back += 1;
 				}
 				else
 				{
-					// finnished
 					break;
 				}
+
 			}
 		}
-		else // in Leafe
+		else // node is leave
 		{
-			// collision calc
-			node->getBoundingVolume()->collisionCalcYAxis(rigid->toGlobalSpace(node->getBoundingVolume()->m));
-
-			collidedBoundingVolumes.push_back(node->getBoundingVolume());
+			// real collision
+			cubeNode->getBoundingVolume()->collisionCalcYAxis(rigidBody->toGlobalSpace(cubeNode->getBoundingVolume()->m));
+			collidedBoundingVolumes.push_back(cubeNode->getBoundingVolume());
 
 			// go up
-			node = node->getParent();
-
+			cubeNode = cubeNode->getParent();
 			state.pop_back();
-			stateY.pop_back();
-
 			if (state.size() > 0)
 			{
 				state.back() += 1;
-				//stateB.back() = stateB.back() + 1;
 			}
 			else
 			{
-				// finnished
 				break;
 			}
 		}
+
 	}
-	*/
 
 }
