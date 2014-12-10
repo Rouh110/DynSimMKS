@@ -832,7 +832,149 @@ void Simulation::computeVeloctyCorrection()
 }
 
 
-void Simulation::checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB)
+
+
+void Simulation::checkCollision()
+{
+	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
+	collidedBoundingVolumes.clear();
+	Cube * cubeA;
+	Cube* cubeB;
+	Sphere *sphereA;
+	Sphere *sphereB;
+	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+	{
+		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
+
+		cubeA = dynamic_cast<Cube*>(ridgedBodyA);
+		sphereA = dynamic_cast<Sphere*>(ridgedBodyA);
+
+		for each (RigidBody* ridgedBodyB in rigidbodysToCheck)
+		{
+			cubeB = dynamic_cast<Cube*>(ridgedBodyB);
+			sphereB = dynamic_cast<Sphere*>(ridgedBodyB);
+
+			if (sphereA != 0 || sphereB != 0)
+			{
+				if (sphereA != 0)
+				{
+					if (sphereB != 0)
+					{
+						checkCollision(sphereA, sphereB);
+					}
+					else
+					{
+						checkCollision(sphereA, cubeB);
+					}
+					
+				}
+				else
+				{
+					checkCollision(sphereB, cubeA);
+				}
+			}
+			else
+			{
+
+				checkCollision(cubeA, cubeB);
+			}
+			
+		}
+	}	
+}
+
+
+void Simulation::checkCollision(Sphere* sphereA, Sphere* sphereB)
+{
+
+	BoundingVolume *volumeA = sphereA->getVolumeTree()->getRoot()->getBoundingVolume();
+	BoundingVolume *volumeB = sphereB->getVolumeTree()->getRoot()->getBoundingVolume();
+	if (!volumeA->collisionTest(sphereA->toGlobalSpace(volumeA->m), volumeB, sphereB->toGlobalSpace(volumeB->m)))
+	{
+		return;
+	}
+
+	collisionCalc(sphereA, volumeA, sphereB, volumeB);
+}
+void Simulation::checkCollision(Sphere* sphere, Cube* cube)
+{
+	BoundingVolume * sphereVolume = sphere->getVolumeTree()->getRoot()->getBoundingVolume();
+	BoundingVolumeTreeNode * cubeNode = cube->getVolumeTree()->getRoot();
+
+	if (!sphereVolume->collisionTest(sphere->toGlobalSpace(sphereVolume->m), cubeNode->getBoundingVolume(), cube->toGlobalSpace(cubeNode->getBoundingVolume()->m)))
+	{
+		return;
+	}
+
+	list<int> state;
+	state.push_back(0);
+
+	while (true)
+	{
+		if (!cubeNode->isLeave())
+		{
+			bool collide = false;
+
+			// find a child with collition
+			BoundingVolumeTreeNode *child;
+			while (state.back() < cubeNode->numberOfChildren())
+			{
+				child = cubeNode->getChild(state.back());
+				collide = sphereVolume->collisionTest(sphere->toGlobalSpace(sphereVolume->m), child->getBoundingVolume(), cube->toGlobalSpace(child->getBoundingVolume()->m));
+				
+				if (collide)
+				{
+					// go down
+					cubeNode = child;
+					state.push_back(0);
+					break;
+				}
+
+				state.back() += 1;
+			}
+
+			if (!collide)
+			{
+				// go up
+				cubeNode = cubeNode->getParent();
+				state.pop_back();
+				if (state.size() > 0)
+				{
+					state.back() += 1;
+				}
+				else
+				{
+					break;
+				}
+				
+			}
+		}
+		else // node is leave
+		{
+			// real collision
+			collisionCalc(sphere, sphereVolume, cube, cubeNode->getBoundingVolume());
+			
+			//sphereVolume->collisionCalc(sphere->toGlobalSpace(sphereVolume->m), cubeNode->getBoundingVolume(), cube->toGlobalSpace(cubeNode->getBoundingVolume()->m));
+			//collidedBoundingVolumes.push_back(sphereVolume);
+			//collidedBoundingVolumes.push_back(cubeNode->getBoundingVolume());
+
+			// go up
+			cubeNode = cubeNode->getParent();
+			state.pop_back();
+			if (state.size() > 0)
+			{
+				state.back() += 1;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+	}
+}
+
+void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB)
 {
 	if (!rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->collisionTest(rigidBodyA->toGlobalSpace(rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->m), rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume(), rigidBodyB->toGlobalSpace(rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume()->m)))
 	{
@@ -847,7 +989,7 @@ void Simulation::checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB)
 	if (rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->r < rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume()->r)
 	{
 		treeA = rigidBodyA->getVolumeTree();
-		treeB = rigidBodyB->getVolumeTree(); 
+		treeB = rigidBodyB->getVolumeTree();
 		rigidA = rigidBodyA;
 		rigidB = rigidBodyB;
 	}
@@ -867,7 +1009,7 @@ void Simulation::checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB)
 	stateA.push_back(-1);
 	stateB.push_back(0);
 
-	
+
 	while (true)
 	{
 		if (!nodeB->isLeave())
@@ -938,10 +1080,12 @@ void Simulation::checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB)
 		else // in Leafe
 		{
 			// collision calc
-			nodeA->getBoundingVolume()->collisionCalc(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m));
+			collisionCalc(rigidA,nodeA->getBoundingVolume(), rigidB, nodeB->getBoundingVolume());
+			
+			//nodeA->getBoundingVolume()->collisionCalc(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m));
 
-			collidedBoundingVolumes.push_back(nodeA->getBoundingVolume());
-			collidedBoundingVolumes.push_back(nodeB->getBoundingVolume());
+			//collidedBoundingVolumes.push_back(nodeA->getBoundingVolume());
+			//collidedBoundingVolumes.push_back(nodeB->getBoundingVolume());
 
 			// go up
 			nodeA = nodeA->getParent();
@@ -962,108 +1106,13 @@ void Simulation::checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB)
 			}
 		}
 	}
-	
-	/*
-	while (true)
-	{
-		if (!nodeB->isLeave())
-		{
-			if (stateB.back() < nodeB->numberOfChildren())
-			{
-				if (nodeA->getBoundingVolume()->collisionTest(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getChild(stateB.back())->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getChild(stateB.back())->getBoundingVolume()->m)))
-				{
-					nodeB = nodeB->getChild(stateB.back());
-					stateB.push_back(0);
-
-					bool collide = false;
-					for (int i = stateA.back(); i < nodeA->numberOfChildren(); i++)
-					{
-						if (nodeA->getChild(i)->getBoundingVolume()->collisionTest(rigidA->toGlobalSpace(nodeA->getChild(stateA.back())->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m)))
-						{
-							collide = true;
-							stateA.back() = i;
-							nodeA = nodeA->getChild(i);
-							stateA.push_back(0);
-							break;
-						}
-					}
-
-					if (!collide)
-					{
-						stateA.back() = 0;
-						nodeB = nodeB->getParent();
-						stateB.pop_back();
-						stateB.back() = stateB.back() + 1;
-					}
-					
-				}
-				else
-				{
-					stateA.back() = 0;
-					stateB.back() = stateB.back() + 1;
-				}
-			}
-			else
-			{
-				nodeB = nodeB->getParent();
-				nodeA = nodeA->getParent();
-
-				stateA.pop_back();
-				stateB.pop_back();
-
-				if (stateB.size() > 0)
-				{
-					stateA.back() += 1;
-					//stateB.back() = stateB.back() + 1;
-
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-		else
-		{
-			nodeA->getBoundingVolume()->collisionCalc(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m));
-		
-			collidedBoundingVolumes.push_back(nodeA->getBoundingVolume());
-			collidedBoundingVolumes.push_back(nodeB->getBoundingVolume());
-
-			nodeA = nodeA->getParent();
-			nodeB = nodeB->getParent();
-
-			stateA.pop_back();
-			stateB.pop_back();
-
-			if (stateA.size() > 0)
-			{
-				stateA.back() += 1;
-				//stateB.back() = stateB.back() + 1;
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-	*/
-
 }
 
-void Simulation::checkCollision()
+void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB)
 {
-	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
-	collidedBoundingVolumes.clear();
-	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
-	{
-		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
+	volumeA->collisionCalc(rigidBodyA->toGlobalSpace(volumeA->m), volumeB, rigidBodyB->toGlobalSpace(volumeB->m));
 
-		for each (RigidBody* ridgedBodyB in rigidbodysToCheck)
-		{
-			checkCollision(ridgedBodyA, ridgedBodyB);
-		}
-	}	
+	collidedBoundingVolumes.push_back(volumeA);
+	collidedBoundingVolumes.push_back(volumeB);
 }
-
 

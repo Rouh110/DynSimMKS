@@ -1,6 +1,8 @@
 #pragma once
 #include "Eigen/Dense"
 #include "RigidBody.h"
+#include "Sphere.h"
+#include "Cube.h"
 #include "Common\Config.h"
 #include <vector>
 #include <list>
@@ -116,7 +118,11 @@ protected:
 	void computeVeloctyCorrection();
 
 	void checkCollision();
-	void checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB);
+	void checkCollision(Cube* rigidBodyA, Cube* rigidBodyB);
+	void checkCollision(Sphere* sphereA, Sphere* sphereB);
+	void checkCollision(Sphere* sphere, Cube* cube);
+
+	void collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
 
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
