@@ -18,6 +18,7 @@ public:
 	enum ApproximationMethod {EXPLICIT_EULER, RUNGE_KUTTA_4};
 protected:
 	ApproximationMethod approximationMethod;
+	bool collisionCheck = true;
 	unsigned int iterationCount;
 	list<BoundingVolume*> collidedBoundingVolumes;
 
@@ -32,6 +33,12 @@ public:
 
 	/*Returns the Approximation method currently used, to compute the Forces.*/
 	ApproximationMethod getApproximationMethod();
+
+	/*
+	Method for collision check
+	*/
+	void setCollisionCheck(bool check);
+	bool getCollisionCheck();
 
 	/*Updates the Simualtion*/
 	void update(Real h);
