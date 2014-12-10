@@ -25,6 +25,16 @@ Simulation::ApproximationMethod Simulation::getApproximationMethod()
 	return approximationMethod;
 }
 
+void Simulation::setCollisionCheck(bool check)
+{
+	collisionCheck = check;
+}
+
+bool Simulation::getCollisionCheck()
+{
+	return collisionCheck;
+}
+
 const list<BoundingVolume*> & Simulation::getCollidedBoundingVolumes() const
 {
 	return collidedBoundingVolumes;
@@ -44,7 +54,9 @@ void Simulation::update(Real h)
 
 	//simulateJointsPredictorCorrector(h);
 	resetForces();
-	checkCollision();
+
+	if (collisionCheck)
+		checkCollision();
 
 }
 

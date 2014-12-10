@@ -61,6 +61,7 @@ using namespace std;
 int currentSceneID = 0;
 vector<IScene*> scenes;
 bool drawVolumes = false;
+bool drawCollisionVectors = false;
 int volumeDrawDepth = 0;
 void timeStep ();
 void buildModel ();
@@ -148,6 +149,31 @@ void TW_CALL getTreeDrawCB(void *value, void *clientData) {
 	*(bool *)(value) = bool(_drawVolumes);
 }
 
+void TW_CALL setCollisionDrawCB(const void *value, void *clientData) {
+	// Set the new time step value
+	bool _drawCollision = *(const bool *)(value);
+	if (SimulationManager::getInstance()->getSimulation().getCollisionCheck())
+		drawCollisionVectors = _drawCollision;
+}
+void TW_CALL getCollisionDrawCB(void *value, void *clientData) {
+	// Get the current time step value
+	bool _drawCollision = drawCollisionVectors;
+	*(bool *)(value) = bool(_drawCollision);
+}
+
+void TW_CALL setCollisionCheckCB(const void *value, void *clientData) {
+	// Set the new time step value
+	bool _collisionCheck = *(const bool *)(value);
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(_collisionCheck);
+	if (!_collisionCheck)
+		drawCollisionVectors = false;
+}
+void TW_CALL getCollisionCheckCB(void *value, void *clientData) {
+	// Get the current time step value
+	bool _collisionCheck = SimulationManager::getInstance()->getSimulation().getCollisionCheck();
+	*(bool *)(value) = bool(_collisionCheck);
+}
+
 void TW_CALL resetSimBTN(void *clientData) {
 	// Call rest sim function
 	resetSim();
@@ -208,6 +234,10 @@ int main( int argc, char **argv )
 	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, "min=0 max=6 step=1");
 	// Set Tree Drawn
 	TwAddVarCB(MiniGL::m_tweakBar, "Tree Draw", TW_TYPE_BOOL32, setTreeDrawCB, getTreeDrawCB, NULL, "");
+	// Set Collision Check
+	TwAddVarCB(MiniGL::m_tweakBar, "Collision Check", TW_TYPE_BOOL32, setCollisionCheckCB, getCollisionCheckCB, NULL, "");
+	// Set Collision Draw
+	TwAddVarCB(MiniGL::m_tweakBar, "Collision Draw", TW_TYPE_BOOL32, setCollisionDrawCB, getCollisionDrawCB, NULL, "");
 
 	buildModel ();	
 	
@@ -287,8 +317,10 @@ void render ()
 	Vector3d pos;	
 	Cube *c;
 	Sphere *s;
-	for each (BoundingVolume*  bv in SimulationManager::getInstance()->getSimulation().getCollidedBoundingVolumes()){
-		MiniGL::drawVector(bv->contactPoint, bv->contactPoint+bv->contactNormal, 2, MiniGL::black);
+	if (drawCollisionVectors){
+		for each (BoundingVolume*  bv in SimulationManager::getInstance()->getSimulation().getCollidedBoundingVolumes()){
+			MiniGL::drawVector(bv->contactPoint, bv->contactPoint + bv->contactNormal, 2, MiniGL::black);
+		}
 	}
 
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
@@ -310,7 +342,9 @@ void render ()
 			{
 				pos = s->getPosition();
 				BoundingVolume * boundSphere = s->getVolumeTree()->getRoot()->getBoundingVolume();
-				MiniGL::drawVector(boundSphere->contactPoint, boundSphere->contactPoint, 2,MiniGL::black);
+				if (drawCollisionVectors){
+					MiniGL::drawVector(boundSphere->contactPoint, boundSphere->contactPoint, 2, MiniGL::black);
+				}
 				MiniGL::drawSphere(&pos, s->getRadius(), MiniGL::red);
 			}
 
