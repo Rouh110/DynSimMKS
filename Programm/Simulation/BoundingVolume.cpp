@@ -33,8 +33,8 @@ void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, Bound
 	
 	contactNormal = (globalPositionA - globalPositionB) / tmp;
 	contactPoint = globalPositionA - this->r * contactNormal;
-	testVolume->contactPoint = globalPositionB - testVolume->r * contactNormal;
-	testVolume->contactNormal = contactNormal;
+	testVolume->contactPoint = globalPositionB - testVolume->r * contactNormal*-1;
+	testVolume->contactNormal = contactNormal*-1;
 }
 
 bool BoundingVolume::collisionTestYAxis(const Eigen::Vector3d &globalPosition){
