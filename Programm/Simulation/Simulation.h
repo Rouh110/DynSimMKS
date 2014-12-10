@@ -117,6 +117,7 @@ protected:
 
 	void checkCollision();
 	void checkCollision(RigidBody* rigidBodyA, RigidBody* rigidBodyB);
+	void checkCollisionWithYAxis(RigidBody* rigidBody);
 
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
