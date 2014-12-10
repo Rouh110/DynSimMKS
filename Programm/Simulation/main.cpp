@@ -231,7 +231,12 @@ int main( int argc, char **argv )
 	TwAddButton(MiniGL::m_tweakBar, "Reset Simulation", resetSimBTN, NULL, "");
 
 	// Set Tree Depth
-	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, "min=0 max=6 step=1");
+	stringstream ss;
+	ss << "min=0 max=";
+	ss << MAX_BOUNDINGVOLUME_DEPTH;
+	ss << " step=1";
+	
+	TwAddVarCB(MiniGL::m_tweakBar, "Tree Depth", TW_TYPE_INT32, setTreeDepthCB, getTreeDepthCB, NULL, ss.str().data());
 	// Set Tree Drawn
 	TwAddVarCB(MiniGL::m_tweakBar, "Tree Draw", TW_TYPE_BOOL32, setTreeDrawCB, getTreeDrawCB, NULL, "");
 	// Set Collision Check
