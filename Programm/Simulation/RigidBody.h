@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include "BoundingVolumeTree.h"
 
-#define MAX_BOUNDINGVOLUME_DEPTH 6
+#define MAX_BOUNDINGVOLUME_DEPTH 5
 
 /*
 Represents an Rigidbody

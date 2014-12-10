@@ -19,9 +19,9 @@ void SceneCollisionTest01::initializeScene()
 
 	Real y = 1;
 	Real y2 = 3;
-	Real x1 = -2.5;
-	Real x2 = -1;
-	Real x3 = 0.5;
+	Real x1 = -2.8;
+	Real x2 = -0.67;
+	Real x3 = 1.16;
 	Real x4 = 3;
 
 	// base line
