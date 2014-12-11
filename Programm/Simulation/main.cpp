@@ -333,6 +333,13 @@ void render ()
 			bv->contactPoints.clear();
 		}
 	}
+	else
+	{
+		for each (BoundingVolume*  bv in SimulationManager::getInstance()->getSimulation().getCollidedBoundingVolumes()){
+			bv->contactNormals.clear();
+			bv->contactPoints.clear();
+		}
+	}
 
 	for each (RigidBody* rigidBody in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
