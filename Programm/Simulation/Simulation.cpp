@@ -39,7 +39,9 @@ const list<BoundingVolume*> & Simulation::getCollidedBoundingVolumes() const
 {
 	return collidedBoundingVolumes;
 }
-
+void Simulation::resetBoundingVolumeList(){
+	collidedBoundingVolumes.clear();
+}
 void Simulation::update(Real h)
 {
 	switch (approximationMethod)

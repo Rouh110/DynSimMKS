@@ -78,7 +78,7 @@ void resetSim() {
 	SimulationManager::getInstance()->getObjectManager().resetObjectManager();
 	// Reset time
 	TimeManager::getCurrent()->setTime(0.0);
-
+	SimulationManager::getInstance()->getSimulation().resetBoundingVolumeList();
 	// Re-initialize scene 
 	buildModel();
 }

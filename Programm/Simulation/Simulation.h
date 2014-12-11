@@ -44,7 +44,7 @@ public:
 	void update(Real h);
 
 	const list<BoundingVolume*> & getCollidedBoundingVolumes() const;
-
+	void resetBoundingVolumeList();
 protected:
 	/*
 	resets the Forces for all RigidBodys
