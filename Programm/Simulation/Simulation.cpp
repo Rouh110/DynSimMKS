@@ -1128,6 +1128,16 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 {
 	volumeA->collisionCalc(rigidBodyA->toGlobalSpace(volumeA->m), volumeB, rigidBodyB->toGlobalSpace(volumeB->m));
 
+	/*
+	Brian Mitrich Collision
+	*/
+	Vector3d relativeVelocityA; Vector3d relativeVelocityB;
+	rigidBodyA->getVelocityOfGlobalPoint(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
+	rigidBodyB->getVelocityOfGlobalPoint(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
+
+	volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
+	volumeB->collisionCalcBrianMitrich(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
+
 
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);

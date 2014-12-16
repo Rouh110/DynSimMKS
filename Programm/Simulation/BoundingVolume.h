@@ -21,6 +21,7 @@ public:
 	bool collisionTestYAxis(const Vector3d &globalPosition);
 	bool collisionTest(const Vector3d &globalPositionA, BoundingVolume* testVolume, const Vector3d &globalPositionB);
 	void collisionCalc(const Vector3d &globalPositionA, BoundingVolume* testVolume, const Vector3d &globalPositionB);
+	void collisionCalcBrianMitrich(const Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Vector3d &relativeVelocityB);
 	void collisionCalcYAxis(const Vector3d &globalPosition);
 };
 

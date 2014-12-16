@@ -35,6 +35,48 @@ void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, Bound
 	testVolume->contactNormals.push_back(contactNormals.back() *-1);
 }
 
+void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Eigen::Vector3d &relativeVelocityB){
+	/*
+	Brian Mitrich Collision
+	*/
+
+	// Calculate Normal: From Body B to Body A
+	double x = globalPositionB.x() - globalPositionA.x();
+	double y = globalPositionB.y() - globalPositionA.y();
+	double z = globalPositionB.z() - globalPositionA.z();
+	double tmp = std::sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+	Eigen::Vector3d contactNormal = (globalPositionB - globalPositionA) / tmp;
+
+	// Relative Velocity
+	Eigen::Vector3d uRel = relativeVelocityA - relativeVelocityB;
+	Eigen::Vector3d uRelN = (uRel[0]*contactNormal[0] + uRel[1]*contactNormal[1] + uRel[2]*contactNormal[2]) * contactNormal;
+
+	// Collision check
+	double uRelNNorm = std::sqrt(pow(uRelN[0], 2) + pow(uRelN[1], 2) + pow(uRelN[2], 2)); //?
+	double episolon = std::sqrt(2 * 9.81 * 0.01);
+
+	// Kollision
+	if (uRelNNorm < 0)
+	{
+		// bleibender Kontakt
+		if (-episolon < uRelNNorm && uRelNNorm < episolon)
+		{
+			// TODO
+		}
+		// Kollision
+		else if (uRelNNorm <= -episolon)
+		{
+			// TODO
+		}
+		// kein Kontakt
+		else
+		{
+			// TODO
+		}
+	}
+
+}
+
 bool BoundingVolume::collisionTestYAxis(const Eigen::Vector3d &globalPosition){
 	if ((globalPosition.y() - this->r) <= 0){
 		return true;
