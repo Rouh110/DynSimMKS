@@ -132,7 +132,11 @@ protected:
 	void collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
 	
 	void checkCollisionWithYAxis(RigidBody* rigidBody);
-
+	/*
+	after CollisionCalc use this function to calculate the Impulse
+	*/
+	void collisionSolutionImpulse(BoundingVolume* A, BoundingVolume* B,const Matrix3d& kaa,const Matrix3d& kbb,const double& urel, double & result);
+	
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
 	bool collisionTest(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
