@@ -99,10 +99,7 @@ void multDiagonalMatrix2Vector(const Eigen::Vector3d & diagMatrix,const Eigen::V
 	result.z() = diagMatrix.z()*vector.z();
 }
 
-void Simulation::collisionSolutionImpulse(BoundingVolume* A, BoundingVolume* B,const Matrix3d& kaa,const Matrix3d& kbb,const double& urel, double & result){
-	result = (1/ (A->contactNormals.back().transpose() * (kaa+kbb) * A->contactNormals.back()));
-	result *= urel;
-}
+
 
 void Simulation::setUpKInverse(std::vector<Matrix3d*> &out_KInverseList)
 {
@@ -1139,18 +1136,18 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 	rigidBodyA->getVelocityOfGlobalPoint(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
 	rigidBodyB->getVelocityOfGlobalPoint(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
 
-	volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
-	volumeB->collisionCalcBrianMitrich(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
+	volumeA->collisionCalcBrianMitrich(rigidBodyA,rigidBodyB,rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
+	volumeB->collisionCalcBrianMitrich(rigidBodyB,rigidBodyA,rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
 
 
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);
-	Matrix3d kAA;
-	Matrix3d kBB;
-	calculateK(*rigidBodyA, relativeVelocityA, relativeVelocityA, kAA);
-	calculateK(*rigidBodyB, relativeVelocityB, relativeVelocityB, kBB);
-	double result = 0;
-	collisionSolutionImpulse(volumeA, volumeB, kAA, kBB, 0, result);
+	//Matrix3d kAA;
+	//Matrix3d kBB;
+	//calculateK(*rigidBodyA, relativeVelocityA, relativeVelocityA, kAA);
+	//calculateK(*rigidBodyB, relativeVelocityB, relativeVelocityB, kBB);
+	//double result = 0;
+	//collisionSolutionImpulse(volumeA, volumeB, kAA, kBB, 0, result);
 	// relic from the merge with commit  062c64037ef006416605299339dce43287ac9a97 [062c640]
 	/*
 	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
