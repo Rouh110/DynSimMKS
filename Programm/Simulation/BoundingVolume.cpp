@@ -35,11 +35,13 @@ void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, Bound
 	testVolume->contactNormals.push_back(contactNormals.back() *-1);
 }
 
-void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Eigen::Vector3d &relativeVelocityB){
+void BoundingVolume::collisionCalcBrianMitrich(Matrix3d kAA, Matrix3d kBB,const Eigen::Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Eigen::Vector3d &relativeVelocityB){
 	/*
 	Brian Mitrich Collision
 	*/
 
+	this->relativeVelocityA = relativeVelocityA;
+	this->relativeVelocityB = relativeVelocityB;
 	// Calculate Normal: From Body B to Body A
 	double x = globalPositionB.x() - globalPositionA.x();
 	double y = globalPositionB.y() - globalPositionA.y();
@@ -68,7 +70,8 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		// Kollision
 		else if (uDotRelN <= -episolon)
 		{
-			// TODO
+			Vector3d deltaURelN = (-episolon * uRelN) - uRelN;
+			impulse = (1 / (this->contactNormals.back().transpose() * (kAA + kBB) * this->contactNormals.back()))*deltaURelN;
 		}
 		// kein Kontakt
 		else

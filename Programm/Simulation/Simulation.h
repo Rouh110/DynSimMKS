@@ -33,7 +33,10 @@ public:
 
 	/*Returns the Approximation method currently used, to compute the Forces.*/
 	ApproximationMethod getApproximationMethod();
-
+	/*
+	Calculate the matrix K vor the given RigidBody.
+	*/
+	inline void calculateK(const RigidBody & rigidBody, const Vector3d & ras, const Vector3d & rbs, Matrix3d & result);
 	/*
 	Method for collision check
 	*/
@@ -91,10 +94,7 @@ protected:
 	inline void calculateWdot(const RigidBody * rigidBody, Vector3d & result) const;
 	inline void calculateWdot(const Vector3d & angularVelocity, const Matrix3d & inertiaTensor, const Matrix3d & invertedInertiaTensor, const Vector3d & torque, Vector3d & result) const;
 
-	/*
-	Calculate the matrix K vor the given RigidBody.
-	*/
-	inline void calculateK(const RigidBody & rigidBody, const Vector3d & ras, const Vector3d & rbs,Matrix3d & result);
+
 	
 	/*
 	Calculate the matrix K vor the given RigidBody.
@@ -132,11 +132,7 @@ protected:
 	void collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
 	
 	void checkCollisionWithYAxis(RigidBody* rigidBody);
-	/*
-	after CollisionCalc use this function to calculate the Impulse
-	*/
-	void collisionSolutionImpulse(BoundingVolume* A, BoundingVolume* B,const Matrix3d& kaa,const Matrix3d& kbb,const double& urel, double & result);
-	
+
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
 	bool collisionTest(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);

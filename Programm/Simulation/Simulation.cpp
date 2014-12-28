@@ -57,8 +57,9 @@ void Simulation::update(Real h)
 	//simulateJointsPredictorCorrector(h);
 	resetForces();
 
-	if (collisionCheck)
+	if (collisionCheck){
 		checkCollision();
+	}
 
 }
 
@@ -99,10 +100,7 @@ void multDiagonalMatrix2Vector(const Eigen::Vector3d & diagMatrix,const Eigen::V
 	result.z() = diagMatrix.z()*vector.z();
 }
 
-void Simulation::collisionSolutionImpulse(BoundingVolume* A, BoundingVolume* B,const Matrix3d& kaa,const Matrix3d& kbb,const double& urel, double & result){
-	result = (1/ (A->contactNormals.back().transpose() * (kaa+kbb) * A->contactNormals.back()));
-	result *= urel;
-}
+
 
 void Simulation::setUpKInverse(std::vector<Matrix3d*> &out_KInverseList)
 {
@@ -860,6 +858,9 @@ void Simulation::checkCollision()
 	Cube* cubeB;
 	Sphere *sphereA;
 	Sphere *sphereB;
+	/*
+	In Check Collision Methode aufrufen in dennen alle RigidBodies neue Impulse bekommen
+	*/
 	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
 		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
@@ -881,22 +882,33 @@ void Simulation::checkCollision()
 					if (sphereB != 0)
 					{
 						checkCollision(sphereA, sphereB);
+
+						sphereA->addRasImpuls(sphereA->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, sphereA->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityA);
+						sphereB->addRasImpuls(sphereB->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, sphereB->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityB);
 					}
 					else
 					{
 						checkCollision(sphereA, cubeB);
+						sphereA->addRasImpuls(sphereA->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, sphereA->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityA);
+						cubeB->addRasImpuls(sphereB->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, cubeB->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityB);
+
 					}
 					
 				}
 				else
 				{
 					checkCollision(sphereB, cubeA);
+					sphereA->addRasImpuls(sphereB->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, sphereB->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityB);
+					cubeA->addRasImpuls(cubeA->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, cubeA->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityB);
+
 				}
 			}
 			else
 			{
 
 				checkCollision(cubeA, cubeB);
+				cubeA->addRasImpuls(cubeA->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, cubeA->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityA);
+				cubeB->addRasImpuls(cubeB->getVolumeTree()->getRoot()->getBoundingVolume()->impulse, cubeB->getVolumeTree()->getRoot()->getBoundingVolume()->relativeVelocityB);
 			}
 			
 		}
@@ -1138,19 +1150,20 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 	Vector3d relativeVelocityA; Vector3d relativeVelocityB;
 	rigidBodyA->getVelocityOfGlobalPoint(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
 	rigidBodyB->getVelocityOfGlobalPoint(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
-
-	volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
-	volumeB->collisionCalcBrianMitrich(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
-
-
-	collidedBoundingVolumes.push_back(volumeA);
-	collidedBoundingVolumes.push_back(volumeB);
 	Matrix3d kAA;
 	Matrix3d kBB;
 	calculateK(*rigidBodyA, relativeVelocityA, relativeVelocityA, kAA);
 	calculateK(*rigidBodyB, relativeVelocityB, relativeVelocityB, kBB);
+	volumeA->collisionCalcBrianMitrich(kAA,kBB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
+	volumeB->collisionCalcBrianMitrich(kBB,kAA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
+
+	/*
+	collidedBoundingVolumes.push_back(volumeA);
+	collidedBoundingVolumes.push_back(volumeB);
+	
+
 	double result = 0;
-	collisionSolutionImpulse(volumeA, volumeB, kAA, kBB, 0, result);
+	*/
 	// relic from the merge with commit  062c64037ef006416605299339dce43287ac9a97 [062c640]
 	/*
 	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
