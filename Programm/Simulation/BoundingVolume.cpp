@@ -49,22 +49,24 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 
 	// Relative Velocity
 	Eigen::Vector3d uRel = relativeVelocityA - relativeVelocityB;
-	Eigen::Vector3d uRelN = (uRel[0]*contactNormal[0] + uRel[1]*contactNormal[1] + uRel[2]*contactNormal[2]) * contactNormal;
+	//Eigen::Vector3d uRelN = (uRel[0]*contactNormal[0] + uRel[1]*contactNormal[1] + uRel[2]*contactNormal[2]) * contactNormal;
+	double uDotRelN = (uRel[0] * contactNormal[0] + uRel[1] * contactNormal[1] + uRel[2] * contactNormal[2]);
+	Eigen::Vector3d uRelN = uDotRelN * contactNormal;
 
 	// Collision check
-	double uRelNNorm = std::sqrt(pow(uRelN[0], 2) + pow(uRelN[1], 2) + pow(uRelN[2], 2)); //?
+	//double uRelNNorm = std::sqrt(pow(uRelN[0], 2) + pow(uRelN[1], 2) + pow(uRelN[2], 2)); //?
 	double episolon = std::sqrt(2 * 9.81 * 0.01);
 
 	// Kollision
-	if (uRelNNorm < 0)
+	if (uDotRelN < 0)
 	{
 		// bleibender Kontakt
-		if (-episolon < uRelNNorm && uRelNNorm < episolon)
+		if (-episolon < uDotRelN && uDotRelN < episolon)
 		{
 			// TODO
 		}
 		// Kollision
-		else if (uRelNNorm <= -episolon)
+		else if (uDotRelN <= -episolon)
 		{
 			// TODO
 		}
