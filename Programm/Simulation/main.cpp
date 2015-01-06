@@ -46,6 +46,7 @@
 #include "ScenePuppet.h"
 #include "SceneBoundingVolumeTwo.h"
 #include "SceneCollisionTest01.h"
+#include "SceneCollisionTest02.h"
 #include <list>
 
 
@@ -297,6 +298,7 @@ void addScenes()
 	addScene(new ScenePuppet());
 	addScene(new SceneBoundingVolumeTwo());
 	addScene(new SceneCollisionTest01());
+	addScene(new SceneCollisionTest02());
 }
 
 void buildModel ()

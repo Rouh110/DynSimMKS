@@ -35,7 +35,7 @@ void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, Bound
 	testVolume->contactNormals.push_back(contactNormals.back() *-1);
 }
 
-void BoundingVolume::collisionCalcBrianMitrich( RigidBody *rigidA,  RigidBody *rigidB, const Eigen::Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Eigen::Vector3d &relativeVelocityB){
+void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Eigen::Vector3d &relativeVelocityB, const Matrix3d &kAA, const Matrix3d &kBB, Vector3d &imp){
 	/*
 	Brian Mitrich Collision
 	*/
@@ -68,13 +68,10 @@ void BoundingVolume::collisionCalcBrianMitrich( RigidBody *rigidA,  RigidBody *r
 		// Kollision
 		else if (uDotRelN <= -episolon)
 		{
-			Matrix3d kAA;
-			Matrix3d kBB;
-			SimulationManager::getInstance()->getSimulation().calculateK(rigidA, relativeVelocityA, relativeVelocityA, kAA);
-			SimulationManager::getInstance()->getSimulation().calculateK(rigidB, relativeVelocityB, relativeVelocityB, kBB);
+			
 			Vector3d result;
 			collisionSolutionImpulse(kAA, kBB, uRelN, episolon,result);
-			rigidA.addRasImpuls(result, relativeVelocityA);
+			imp = result;
 		}
 		// kein Kontakt
 		else
