@@ -63,7 +63,9 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		// bleibender Kontakt
 		if (-episolon < uDotRelN && uDotRelN < episolon)
 		{
-			// TODO
+			Vector3d result;
+			contactSolutionImpulse(kAA, kBB, uRelN, result);
+			imp = result;
 		}
 		// Kollision
 		else if (uDotRelN <= -episolon)
@@ -80,6 +82,15 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		}
 	}
 
+}
+void BoundingVolume::contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, Vector3d & result){
+	//todo
+	// get timestep
+	float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+	// bestimmung der eindrungstiefe
+	// berechnung deltaURelN
+	Vector3d deltaURelN = urel; // todo
+	result = (1 / (this->contactNormals.back().transpose() * (kaa + kbb) * this->contactNormals.back()))*deltaURelN;
 }
 void BoundingVolume::collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, double &epsilon, Vector3d & result){
 	Vector3d deltaURelN = (-epsilon * urel) - urel;

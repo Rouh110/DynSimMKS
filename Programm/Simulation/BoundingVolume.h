@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <list>
+#include "TimeManager.h"
 
 
 using namespace Eigen;
@@ -28,7 +29,8 @@ public:
 	/*
 	after CollisionCalc use this function to calculate the Impulse
 	*/
-	void collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel,double &epsilon, Vector3d & result);
+	void collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, double &epsilon, Vector3d & result);
+	void contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, Vector3d & result);
 
 };
 

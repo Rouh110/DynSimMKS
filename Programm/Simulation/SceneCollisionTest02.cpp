@@ -31,6 +31,8 @@ void SceneCollisionTest02::initializeScene()
 	//cube02->setPosition(Vector3d(x2,y,0));
 	sphere01 = &Sphere::create(0.5);
 	sphere01->setPosition(Vector3d(x3, y, 0));
+	sphere04 = &Sphere::create(0.5);
+	sphere04->setPosition(Vector3d(x2, y, 0));
 
 
 	//cube04 = &Cube::create();
@@ -51,7 +53,7 @@ void SceneCollisionTest02::initializeScene()
 void SceneCollisionTest02::update(Real currentTime)
 {
 	int timeFactor = 5;
-	Real impulseStrength = 0.5;
+	//Real impulseStrength = 0.5;
 
 	// set Timer
 	if (timer < (int)(currentTime / timeFactor))
@@ -68,10 +70,10 @@ void SceneCollisionTest02::update(Real currentTime)
 			//cube03->addRasImpuls(Vector3d(0, -impulseStrength, 0), Vector3d(0, 0, 0));
 			break;
 		case 2:
-			sphere02->addRasImpuls(Vector3d(0, -impulseStrength, 0), Vector3d(0, 0, 0));
+			sphere02->addRasImpuls(Vector3d(0, -0.1, 0), Vector3d(0, 0, 0));
 			break;
 		case 3:
-			sphere03->addRasImpuls(Vector3d(0, -impulseStrength, 0), Vector3d(0, 0, 0));
+			sphere03->addRasImpuls(Vector3d(0, -0.5, 0), Vector3d(0, 0, 0));
 			break;
 		case 4:
 			//cube05->addRasImpuls(Vector3d(0, -impulseStrength, 0), Vector3d(1, 0, 1));

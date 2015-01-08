@@ -15,6 +15,7 @@ protected:
 	Sphere * sphere01;
 	Sphere * sphere02;
 	Sphere * sphere03;
+	Sphere * sphere04;
 
 	int timer;
 	bool next;
