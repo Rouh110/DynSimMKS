@@ -64,7 +64,7 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		if (-episolon < uDotRelN && uDotRelN < episolon)
 		{
 			Vector3d result;
-			contactSolutionImpulse(kAA, kBB, uRelN, result);
+			contactSolutionImpulse(kAA, kBB, uRelN, result, globalPositionA, relativeVelocityA, globalPositionB, relativeVelocityB, contactNormal);
 			imp = result;
 		}
 		// Kollision
@@ -83,13 +83,27 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 	}
 
 }
-void BoundingVolume::contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, Vector3d & result){
-	//todo
+void BoundingVolume::contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, Vector3d & result, const Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const  Vector3d &globalPositionB, const  Vector3d &relativeVelocityB, Vector3d &n_t0){
+	
 	// get timestep
 	float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+	// euler schritt
+	Vector3d a_th = globalPositionA + timeStep*relativeVelocityA;
+	Vector3d b_th = globalPositionB + timeStep*relativeVelocityB;
+
+	double x = globalPositionB.x() - globalPositionA.x();
+	double y = globalPositionB.y() - globalPositionA.y();
+	double z = globalPositionB.z() - globalPositionA.z();
+	double tmp = std::sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+	Vector3d n_th = (globalPositionB - globalPositionA) / tmp;
+	 
 	// bestimmung der eindrungstiefe
+	Vector3d newPos = (b_th - a_th);
+	double dn_th = (newPos[0] * n_th[0] + newPos[1] * n_th[1] + newPos[2] * n_th[2]);
 	// berechnung deltaURelN
-	Vector3d deltaURelN = urel; // todo
+	Vector3d deltaURelN = 1 / timeStep * dn_th * n_t0;
+
+	// Impuls in normalenrichtung
 	result = (1 / (this->contactNormals.back().transpose() * (kaa + kbb) * this->contactNormals.back()))*deltaURelN;
 }
 void BoundingVolume::collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, double &epsilon, Vector3d & result){
