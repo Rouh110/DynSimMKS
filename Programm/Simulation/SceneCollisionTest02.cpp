@@ -42,11 +42,16 @@ void SceneCollisionTest02::initializeScene()
 	// fall line
 	//cube03 = &Cube::create();
 	//cube03->setPosition(Vector3d(x1, y2, 0));
+
 	sphere02 = &Sphere::create(0.5);
 	sphere02->setPosition(Vector3d(x2, y2, 0));
 	sphere03 = &Sphere::create(0.5);
 	sphere03->setPosition(Vector3d(x3, y2, 0));
 	
+	cube01 = &Cube::create();
+	cube01->setPosition(Vector3d(x1,y,0));
+	cube02 = &Cube::create();
+	cube02->setPosition(Vector3d(x1,y2,0));
 
 }
 
@@ -67,7 +72,7 @@ void SceneCollisionTest02::update(Real currentTime)
 		switch (timer)
 		{
 		case 1:
-			//cube03->addRasImpuls(Vector3d(0, -impulseStrength, 0), Vector3d(0, 0, 0));
+			cube02->addRasImpuls(Vector3d(0, -0.1, 0.1), Vector3d(0, 0, 0));
 			break;
 		case 2:
 			sphere02->addRasImpuls(Vector3d(0, -0.1, 0), Vector3d(0, 0, 0));
