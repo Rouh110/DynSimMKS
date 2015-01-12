@@ -45,12 +45,15 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 	double y = globalPositionB.y() - globalPositionA.y();
 	double z = globalPositionB.z() - globalPositionA.z();
 	double tmp = std::sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-	Eigen::Vector3d contactNormal = (globalPositionB - globalPositionA) / tmp;
+	//Eigen::Vector3d contactNormal = (globalPositionB - globalPositionA) / tmp;
+	Eigen::Vector3d contactNormal = this->contactNormals.back();
 
 	// Relative Velocity
 	Eigen::Vector3d uRel = relativeVelocityA - relativeVelocityB;
 	//Eigen::Vector3d uRelN = (uRel[0]*contactNormal[0] + uRel[1]*contactNormal[1] + uRel[2]*contactNormal[2]) * contactNormal;
-	double uDotRelN = (uRel[0] * contactNormal[0] + uRel[1] * contactNormal[1] + uRel[2] * contactNormal[2]);
+	//double uDotRelN = (uRel[0] * contactNormal[0] + uRel[1] * contactNormal[1] + uRel[2] * contactNormal[2]);
+	double uDotRelN = ((uRel.dot(contactNormal)));
+	
 	Eigen::Vector3d uRelN = uDotRelN * contactNormal;
 
 	// Collision check
@@ -63,6 +66,7 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		// bleibender Kontakt
 		if (-episolon < uDotRelN && uDotRelN < episolon)
 		{
+			printf("kontact\n");
 			Vector3d result;
 			contactSolutionImpulse(kAA, kBB, uRelN, result, globalPositionA, relativeVelocityA, globalPositionB, relativeVelocityB, contactNormal);
 			imp = result;
@@ -70,7 +74,7 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		// Kollision
 		else if (uDotRelN <= -episolon)
 		{
-			
+			printf("colision\n");
 			Vector3d result;
 			collisionSolutionImpulse(kAA, kBB, uRelN, episolon,result);
 			imp = result;

@@ -1132,23 +1132,30 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 	/*
 	Brian Mitrich Collision
 	*/
+	Vector3d collisionPointA = volumeA->contactPoints.back();
+	Vector3d collisionPointB = volumeB->contactPoints.back();
+	Vector3d ras = collisionPointA-rigidBodyA->getPosition();
+	Vector3d rbs = collisionPointB - rigidBodyB->getPosition();
+
 	Vector3d relativeVelocityA; Vector3d relativeVelocityB;
 	rigidBodyA->getVelocityOfGlobalPoint(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
 	rigidBodyB->getVelocityOfGlobalPoint(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
 
 	Matrix3d kAA;
 	Matrix3d kBB;
-	calculateK(*rigidBodyA, relativeVelocityA, relativeVelocityA, kAA);
-	calculateK(*rigidBodyB, relativeVelocityB, relativeVelocityB, kBB);
+	calculateK(*rigidBodyA, ras, ras, kAA);
+	calculateK(*rigidBodyB, rbs, rbs, kBB);
 	Vector3d imp(0, 0, 0);
 
-	volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, kAA, kBB, imp);
-	rigidBodyA->addRasImpuls(imp, relativeVelocityA);
+	//volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, kAA, kBB, imp);
+	volumeA->collisionCalcBrianMitrich(collisionPointA, relativeVelocityA, collisionPointB, relativeVelocityB, kAA, kBB, imp);
+	rigidBodyA->addRasImpuls(imp, ras);
 
 	imp=Vector3d(0, 0, 0);
 
-	volumeB->collisionCalcBrianMitrich(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, kBB, kAA, imp);
-	rigidBodyB->addRasImpuls(imp, relativeVelocityB);
+	//volumeB->collisionCalcBrianMitrich(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, kBB, kAA, imp);
+	volumeB->collisionCalcBrianMitrich(collisionPointB, relativeVelocityB, collisionPointA, relativeVelocityA, kBB, kAA, imp);
+	rigidBodyB->addRasImpuls(imp, rbs);
 
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);
