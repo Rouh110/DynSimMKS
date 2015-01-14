@@ -42,7 +42,9 @@ void RigidBody::getInvertedInertiaTensor(Eigen::Matrix3d &out_InvertedTensor) co
 {
 	out_InvertedTensor = rotation.toRotationMatrix()*(invertedInertiaTensor.asDiagonal()* rotation.toRotationMatrix().transpose());
 }
-
+double RigidBody::getElasticity() const{
+	return elasticity;
+}
 const Eigen::Vector3d& RigidBody::getPosition() const
 {
 	return position;
@@ -94,6 +96,9 @@ const BoundingVolumeTree* RigidBody::getVolumeTree() const
 	return &(this->volumeTree);
 }
 
+void RigidBody::setElasticity(const double &elasticity){
+	this->elasticity = elasticity;
+}
 
 void RigidBody::setMass(Real mass)
 {

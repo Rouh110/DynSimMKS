@@ -25,6 +25,7 @@ protected:
 	Eigen::Vector3d impulse;
 	Eigen::Vector3d torqueImpulse;
 	BoundingVolumeTree volumeTree;
+	double elasticity = 0;
 public:
 	RigidBody();
 	~RigidBody();
@@ -46,9 +47,10 @@ public:
 	const Eigen::Quaterniond& getRotation() const;
 	const Eigen::Vector3d& getImpulse() const;
 	const Eigen::Vector3d& getTorqueImpulse() const;
-	
+	double getElasticity() const;
 	const BoundingVolumeTree* getVolumeTree() const;
 	void setVolumeTree(const BoundingVolumeTree &tree);
+	void setElasticity(const double &elasticity);
 	/*
 	Sets the mass. The Rigidbody will be static if the mass is 0.
 	*/
