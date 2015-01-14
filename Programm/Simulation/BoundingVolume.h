@@ -24,12 +24,12 @@ public:
 	bool collisionTestYAxis(const Vector3d &globalPosition);
 	bool collisionTest(const Vector3d &globalPositionA, BoundingVolume* testVolume, const Vector3d &globalPositionB);
 	void collisionCalc(const Vector3d &globalPositionA, BoundingVolume* testVolume, const Vector3d &globalPositionB);
-	void collisionCalcBrianMitrich(const Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Vector3d &relativeVelocityB, const Matrix3d &kAA, const Matrix3d &kBB, Vector3d &imp);
+	void collisionCalcBrianMitrich(const Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Vector3d &relativeVelocityB, const Matrix3d &kAA, const Matrix3d &kBB, const double &elasticityA, const double &elasticityB, Vector3d &imp);
 	void collisionCalcYAxis(const Vector3d &globalPosition);
 	/*
 	after CollisionCalc use this function to calculate the Impulse
 	*/
-	void collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, double &epsilon, Vector3d & result);
+	void collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel,const double &elasticityA,const double &elasticityB, Vector3d & result);
 	void contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, Vector3d & result, const  Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const  Vector3d &globalPositionB, const Vector3d &relativeVelocityB, Vector3d &n_t0);
 
 };

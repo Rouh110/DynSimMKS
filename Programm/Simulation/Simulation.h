@@ -21,7 +21,7 @@ protected:
 	bool collisionCheck = true;
 	unsigned int iterationCount;
 	list<BoundingVolume*> collidedBoundingVolumes;
-
+	
 public:
 	Simulation();
 	~Simulation();
