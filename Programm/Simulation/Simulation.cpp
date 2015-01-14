@@ -618,11 +618,19 @@ void Simulation::calculateK(const RigidBody & rigidBody, const Vector3d & ras, c
 
 void Simulation::calculateK(const RigidBody & rigidBody, const Matrix3d & ras, const Matrix3d & rbs, Matrix3d & result)
 {
-	Matrix3d invertedInertiaTensor;
-	rigidBody.getInvertedInertiaTensor(invertedInertiaTensor);
-	Real mass = rigidBody.getMass();
+	if (!rigidBody.isStatic())
+	{
+		Matrix3d invertedInertiaTensor;
+		rigidBody.getInvertedInertiaTensor(invertedInertiaTensor);
+		Real mass = rigidBody.getMass();
 
-	result = ((1.0 / mass)*Matrix3d::Identity()) - ras*(invertedInertiaTensor*rbs);
+		result = ((1.0 / mass)*Matrix3d::Identity()) - ras*(invertedInertiaTensor*rbs);
+	}
+	else
+	{
+		result = Matrix3d::Zero();
+	}
+	
 }
 
 void Simulation::computeAllForces(Real time)
