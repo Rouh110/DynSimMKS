@@ -1158,6 +1158,7 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 	//volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, kAA, kBB, imp);
 	volumeA->collisionCalcBrianMitrich(collisionPointA, relativeVelocityA, collisionPointB, relativeVelocityB, kAA, kBB, imp);
 	rigidBodyA->addRasImpuls(imp, ras);
+	
 
 	imp=Vector3d(0, 0, 0);
 
@@ -1167,6 +1168,13 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);
+
+	
+	this->computeImpulse(rigidBodyA);
+	this->computeImpulse(rigidBodyB);
+
+
+
 	//Matrix3d kAA;
 	//Matrix3d kBB;
 	//calculateK(*rigidBodyA, relativeVelocityA, relativeVelocityA, kAA);
