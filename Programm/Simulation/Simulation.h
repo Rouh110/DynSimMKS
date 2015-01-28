@@ -16,6 +16,16 @@ class Simulation
 {
 public:
 	enum ApproximationMethod {EXPLICIT_EULER, RUNGE_KUTTA_4};
+	struct CollisionInfo
+	{
+		Real factor;
+		Vector3d n;
+		Vector3d Ucrel;
+		Vector3d pointA;
+		Vector3d pointB;
+		RigidBody *rigidBodyA;
+		RigidBody *rigidBodyB;
+	};
 protected:
 	ApproximationMethod approximationMethod;
 	bool collisionCheck = true;
@@ -128,13 +138,15 @@ protected:
 	void computeVeloctyCorrection();
 
 	void checkCollision();
-	void checkCollision(Cube* rigidBodyA, Cube* rigidBodyB);
-	void checkCollision(Sphere* sphereA, Sphere* sphereB);
-	void checkCollision(Sphere* sphere, Cube* cube);
+	void checkCollision(Cube* rigidBodyA, Cube* rigidBodyB, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB);
+	void checkCollision(Sphere* sphereA, Sphere* sphereB, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB);
+	void checkCollision(Sphere* sphere, Cube* cube, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB);
 
-	void collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);
+	bool collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB, CollisionInfo & out_collisionInfoA, CollisionInfo & out_collisionInfoB);
 	
-	void checkCollisionWithYAxis(RigidBody* rigidBody);
+	void checkCollisionWithYAxis(RigidBody* rigidBody, vector<CollisionInfo> & out_collisionInfo);
+	void collisionCalcYAxis(RigidBody * rigidBody, const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull, Simulation::CollisionInfo & out_CollisionInfo);
+	void computeCollisionCorrection(const vector<CollisionInfo>& collisions);
 	
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
@@ -143,4 +155,6 @@ protected:
 	void collisionCalcYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
 	*/
 };
+
+
 

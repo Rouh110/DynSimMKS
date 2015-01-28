@@ -578,7 +578,7 @@ void Simulation::simulateJointsPredictorCorrector(Real h, std::vector<Matrix3d*>
 		n++;
 	}
 
-	printf("position correction iteration: %i :: max error: %f\n", n, maxError);
+	//printf("position correction iteration: %i :: max error: %f\n", n, maxError);
 
 	dampingJoint = true;
 	if (dampingJoint)
@@ -653,12 +653,12 @@ void Simulation::computeImpulse()
 
 void Simulation::computeImpulse(RigidBody * rigidBody)
 {
-	if (rigidBody->isStatic())
-		return;
-
-	rigidBody->setVelocity(rigidBody->getVelocity() + ((1.0 / rigidBody->getMass()) * rigidBody->getImpulse()));
-	rigidBody->setAngulaVelocity(((rigidBody->getAngulaVelocity()) + (rigidBody->getTorqueImpulse())));
-
+	if (!rigidBody->isStatic())
+	{
+		rigidBody->setVelocity(rigidBody->getVelocity() + ((1.0 / rigidBody->getMass()) * rigidBody->getImpulse()));
+		rigidBody->setAngulaVelocity(((rigidBody->getAngulaVelocity()) + (rigidBody->getTorqueImpulse())));
+	}
+	
 	rigidBody->resetImpulse();
 	//getInvertedInertiaTensor(invertedInertiaTensor);
 	//setAngulaVelocity(angulaVelocity + (invertedInertiaTensor * (ras.cross(impulse))));
@@ -843,8 +843,8 @@ void Simulation::computeVeloctyCorrection()
 		iteration++;
 	} while (maxError > acceptedError && iteration < maxIteration);
 
-	printf("interations for velocity correction: %i\n",iteration);
-	printf("Max Velocity Error: %f\n", maxError);
+	//printf("interations for velocity correction: %i\n",iteration);
+	//printf("Max Velocity Error: %f\n", maxError);
 
 	// clean up
 	for each (Matrix3d * matrix in kInverses)
@@ -856,7 +856,127 @@ void Simulation::computeVeloctyCorrection()
 
 
 
+void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionInfo>& collisions)
+{
+	int maxIterations = 10;
+	bool finnish;
+	int i = 0;
+	
+	vector<Vector3d> impulses;
 
+	for (int i = 0; i < collisions.size(); ++i)
+	{
+		impulses.push_back(Vector3d::Zero());
+	}
+
+	vector<Vector3d>::iterator impIt;
+	
+	double episolon = std::sqrt(2 * 9.81 * 0.01);
+	double uDotRelN;
+	Vector3d imp;
+	Vector3d velA;
+	Vector3d velB;
+	Vector3d uRel;
+	Vector3d uRelN;
+	Vector3d deltaURelN;
+
+	do
+	{
+		finnish = true;
+		impIt = impulses.begin();
+
+		for each (Simulation::CollisionInfo collInfo in collisions)
+		{
+
+			collInfo.rigidBodyA->getVelocityOfGlobalPoint(collInfo.pointA, velA);
+			/*
+			collInfo.rigidBodyB->getVelocityOfGlobalPoint(collInfo.pointB, velB);
+
+			uRel = velA - velB;
+			uDotRelN = uRel.dot(collInfo.n);
+			uRelN = uDotRelN * collInfo.n;
+
+
+
+			
+			// Kollision
+			if (uDotRelN < 0)
+			{
+				// bleibender Kontakt
+				if (-episolon < uDotRelN && uDotRelN < episolon)
+				{
+					printf("kontact\n");
+					
+					float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+					Vector3d nA = collInfo.pointA + timeStep*velA;
+					Vector3d nB = collInfo.pointB + timeStep*velB;
+					Vector3d nN = (nA - nB).normalized();
+					Real d = (nB - nA).dot(nN);
+
+					deltaURelN = (1.0 / timeStep)*d*collInfo.n;
+
+					imp = imp = collInfo.factor * deltaURelN;;
+					finnish = false;
+				}
+				// Kollision
+				else if (uDotRelN <= -episolon)
+				{
+					printf("colision\n");
+					deltaURelN = collInfo.Ucrel - uRelN;
+					imp = collInfo.factor * deltaURelN;
+					finnish = false;
+				}
+				// kein Kontakt
+				else
+				{
+					// TODO
+					imp = Vector3d::Zero();
+				}
+			}
+			else
+			{
+				imp = Vector3d::Zero();
+			}
+			*/
+
+			deltaURelN = collInfo.Ucrel - velA;
+			if (abs(deltaURelN.norm()) <= 0.0000001)
+			{
+				continue;
+			}
+			imp = collInfo.factor * deltaURelN;
+			finnish = false;
+
+			/*
+			if (uDotRelN < 0)
+			{
+				deltaURelN = collInfo.Ucrel - uRelN;
+				imp = collInfo.factor * deltaURelN;
+				finnish = false;
+			}
+			else
+			{
+				imp = Vector3d::Zero();
+				continue;
+			}
+			*/
+			if (collInfo.n.dot(*impIt+imp) < 0)
+			{
+				imp = (*impIt) *-1;
+			}
+			
+			collInfo.rigidBodyA->addRasImpuls(imp,collInfo.pointA-collInfo.rigidBodyA->getPosition());
+			this->computeImpulse(collInfo.rigidBodyA);
+
+			*impIt += imp;
+			
+			++impIt;
+		}
+
+		//this->computeImpulse();
+		++i;
+	} while (!finnish && i < maxIterations);
+}
 void Simulation::checkCollision()
 {
 	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
@@ -865,11 +985,14 @@ void Simulation::checkCollision()
 	Cube* cubeB;
 	Sphere *sphereA;
 	Sphere *sphereB;
+
+	vector<CollisionInfo> collInfoA;
+	vector<CollisionInfo> collInfoB;
 	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
 		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
 
-		checkCollisionWithYAxis(ridgedBodyA);
+		checkCollisionWithYAxis(ridgedBodyA, collInfoA);
 
 		cubeA = dynamic_cast<Cube*>(ridgedBodyA);
 		sphereA = dynamic_cast<Sphere*>(ridgedBodyA);
@@ -885,33 +1008,34 @@ void Simulation::checkCollision()
 				{
 					if (sphereB != 0)
 					{
-						checkCollision(sphereA, sphereB);
+						checkCollision(sphereA, sphereB, collInfoA, collInfoB);
 					}
 					else
 					{
-						checkCollision(sphereA, cubeB);
+						checkCollision(sphereA, cubeB,  collInfoA, collInfoB);
 					}
 					
 				}
 				else
 				{
-					checkCollision(sphereB, cubeA);
+					checkCollision(sphereB, cubeA, collInfoA, collInfoB);
 				}
 			}
 			else
 			{
 
-				checkCollision(cubeA, cubeB);
+				checkCollision(cubeA, cubeB, collInfoA, collInfoB);
 			}
 			
 		}
-	}	
+	}
+	collInfoA.insert(collInfoA.end(), collInfoB.begin(), collInfoB.end());
+	computeCollisionCorrection(collInfoA);
 }
 
 
-void Simulation::checkCollision(Sphere* sphereA, Sphere* sphereB)
+void Simulation::checkCollision(Sphere* sphereA, Sphere* sphereB, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB)
 {
-
 	BoundingVolume *volumeA = sphereA->getVolumeTree()->getRoot()->getBoundingVolume();
 	BoundingVolume *volumeB = sphereB->getVolumeTree()->getRoot()->getBoundingVolume();
 	if (!volumeA->collisionTest(sphereA->toGlobalSpace(volumeA->m), volumeB, sphereB->toGlobalSpace(volumeB->m)))
@@ -919,10 +1043,21 @@ void Simulation::checkCollision(Sphere* sphereA, Sphere* sphereB)
 		return;
 	}
 
-	collisionCalc(sphereA, volumeA, sphereB, volumeB);
+	CollisionInfo collInfoA;
+	CollisionInfo collInfoB;
+
+	if (collisionCalc(sphereA, volumeA, sphereB, volumeB, collInfoA, collInfoB))
+	{
+		//Add to collisionInfoList
+		out_collisionInfoA.push_back(collInfoA);
+		out_collisionInfoB.push_back(collInfoB);
+	}
 }
-void Simulation::checkCollision(Sphere* sphere, Cube* cube)
+void Simulation::checkCollision(Sphere* sphere, Cube* cube, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB)
 {
+	CollisionInfo collInfoA;
+	CollisionInfo collInfoB;
+
 	BoundingVolume * sphereVolume = sphere->getVolumeTree()->getRoot()->getBoundingVolume();
 	BoundingVolumeTreeNode * cubeNode = cube->getVolumeTree()->getRoot();
 
@@ -977,12 +1112,12 @@ void Simulation::checkCollision(Sphere* sphere, Cube* cube)
 		else // node is leave
 		{
 			// real collision
-			collisionCalc(sphere, sphereVolume, cube, cubeNode->getBoundingVolume());
+			if (collisionCalc(sphere, sphereVolume, cube, cubeNode->getBoundingVolume(), collInfoA, collInfoB))
+			{
+				out_collisionInfoA.push_back(collInfoA);
+				out_collisionInfoB.push_back(collInfoB);
+			}
 			
-			//sphereVolume->collisionCalc(sphere->toGlobalSpace(sphereVolume->m), cubeNode->getBoundingVolume(), cube->toGlobalSpace(cubeNode->getBoundingVolume()->m));
-			//collidedBoundingVolumes.push_back(sphereVolume);
-			//collidedBoundingVolumes.push_back(cubeNode->getBoundingVolume());
-
 			// go up
 			cubeNode = cubeNode->getParent();
 			state.pop_back();
@@ -999,8 +1134,11 @@ void Simulation::checkCollision(Sphere* sphere, Cube* cube)
 	}
 }
 
-void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB)
+void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB)
 {
+	CollisionInfo collInfoA;
+	CollisionInfo collInfoB;
+
 	if (!rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->collisionTest(rigidBodyA->toGlobalSpace(rigidBodyA->getVolumeTree()->getRoot()->getBoundingVolume()->m), rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume(), rigidBodyB->toGlobalSpace(rigidBodyB->getVolumeTree()->getRoot()->getBoundingVolume()->m)))
 	{
 		return;
@@ -1105,13 +1243,13 @@ void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB)
 		else // in Leafe
 		{
 			// collision calc
-			collisionCalc(rigidA,nodeA->getBoundingVolume(), rigidB, nodeB->getBoundingVolume());
-			
-			//nodeA->getBoundingVolume()->collisionCalc(rigidA->toGlobalSpace(nodeA->getBoundingVolume()->m), nodeB->getBoundingVolume(), rigidB->toGlobalSpace(nodeB->getBoundingVolume()->m));
-
-			//collidedBoundingVolumes.push_back(nodeA->getBoundingVolume());
-			//collidedBoundingVolumes.push_back(nodeB->getBoundingVolume());
-
+			if (collisionCalc(rigidA, nodeA->getBoundingVolume(), rigidB, nodeB->getBoundingVolume(), collInfoA, collInfoB))
+			{
+				//add to List
+				out_collisionInfoA.push_back(collInfoA);
+				out_collisionInfoB.push_back(collInfoB);
+			}
+		
 			// go up
 			nodeA = nodeA->getParent();
 			nodeB = nodeB->getParent();
@@ -1133,67 +1271,185 @@ void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB)
 	}
 }
 
-void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB)
+
+
+
+
+Real collisionImpulsFactor(const Matrix3d& Kaa, const Matrix3d& Kbb, const Vector3d &n)
 {
+	return 1 / (n.transpose()*(Kaa + Kbb)*n);
+}
+
+
+bool collisionTestYAxis(const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull){
+	if ((globalPosition.y() - collHull.r) <= 0){
+		return true;
+	}
+	return false;
+}
+
+void Simulation::collisionCalcYAxis(RigidBody * rigidBody, const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull, Simulation::CollisionInfo & out_CollisionInfo){
+	Vector3d pointVelocity;
+	Vector3d pointA = globalPosition - collHull.r * Vector3d(0, 1, 0);
+
+	rigidBody->getVelocityOfGlobalPoint(pointA, pointVelocity);
+	Vector3d n = Vector3d(0, 1, 0);
+	Eigen::Vector3d uRel = pointVelocity;
+	double uDotRelN = ((uRel.dot(n)));
+	Eigen::Vector3d uRelN = uDotRelN * n;
+	Vector3d ras = pointA - rigidBody->getPosition();
+	Matrix3d kAA;
+	Matrix3d kBB = Matrix3d::Zero();
+	calculateK(*rigidBody, ras, ras, kAA);
+	double factor = collisionImpulsFactor(kAA, kBB, n);
+
+	out_CollisionInfo.rigidBodyB = 0;
+	out_CollisionInfo.n = n;
+	out_CollisionInfo.pointB = Vector3d::Zero();
+	out_CollisionInfo.pointA = pointA;
+	out_CollisionInfo.rigidBodyA = rigidBody;
+	out_CollisionInfo.Ucrel = (-(rigidBody->getElasticity()*rigidBody->getElasticity())*uRelN) - pointVelocity;
+	out_CollisionInfo.factor = factor;
+	
+}
+
+bool Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB, CollisionInfo & out_collisionInfoA, CollisionInfo & out_collisionInfoB)
+{
+
 	volumeA->collisionCalc(rigidBodyA->toGlobalSpace(volumeA->m), volumeB, rigidBodyB->toGlobalSpace(volumeB->m));
 
-	/*
-	Brian Mitrich Collision
-	*/
 	Vector3d collisionPointA = volumeA->contactPoints.back();
 	Vector3d collisionPointB = volumeB->contactPoints.back();
 	Vector3d ras = collisionPointA-rigidBodyA->getPosition();
 	Vector3d rbs = collisionPointB - rigidBodyB->getPosition();
 
-	Vector3d relativeVelocityA; Vector3d relativeVelocityB;
-	rigidBodyA->getVelocityOfGlobalPoint(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA);
-	rigidBodyB->getVelocityOfGlobalPoint(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB);
+	Vector3d n = volumeA->contactNormals.back();
+
+
+
+	Vector3d velocityA; 
+	Vector3d velocityB;
+	rigidBodyA->getVelocityOfGlobalPoint(collisionPointA, velocityA);
+	rigidBodyB->getVelocityOfGlobalPoint(collisionPointB, velocityB);
 
 	Matrix3d kAA;
 	Matrix3d kBB;
 	calculateK(*rigidBodyA, ras, ras, kAA);
 	calculateK(*rigidBodyB, rbs, rbs, kBB);
-	Vector3d imp(0, 0, 0);
 
-	//volumeA->collisionCalcBrianMitrich(rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, kAA, kBB, imp);
-	volumeA->collisionCalcBrianMitrich(collisionPointA, relativeVelocityA, collisionPointB, relativeVelocityB, kAA, kBB,rigidBodyA->getElasticity(), rigidBodyB->getElasticity(), imp);
-	rigidBodyA->addRasImpuls(imp, ras);
+	Eigen::Vector3d uRel = velocityA - velocityB;
+	double uDotRelN = ((uRel.dot(n)));
+	Eigen::Vector3d uRelN = uDotRelN * n;
+	Vector3d uCRel = -(rigidBodyA->getElasticity()*rigidBodyB->getElasticity())*uRelN;
+	double factorA = collisionImpulsFactor(kAA, kBB, n);
+
+
+	double episolon = std::sqrt(2 * 9.81 * 0.01);
+	Vector3d deltaURelN;
+	// Kollision
+	if (uDotRelN < 0)
+	{
+		// bleibender Kontakt
+		if (-episolon < uDotRelN && uDotRelN < episolon)
+		{
+			float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+			Vector3d nA = collisionPointA + timeStep*velocityA;
+			Vector3d nB = collisionPointB + timeStep*velocityB;
+			Vector3d nN = (nA - nB).normalized();
+			Real d = (nB - nA).dot(nN);
+
+			deltaURelN = (1.0 / timeStep)*d*n;
+			deltaURelN = uCRel - uRel;
+		}
+		// Kollision
+		else if (uDotRelN <= -episolon)
+		{
+			// eventuell stuff;
+			deltaURelN = uCRel - uRel;
+		}
+		// kein Kontakt
+		else
+		{
+			// TODO
+			return false;
+		}
+	}
+
+	uCRel = deltaURelN + velocityA;
+
+
+	out_collisionInfoA.n = n;
+	out_collisionInfoA.factor = factorA;
+	out_collisionInfoA.pointA = collisionPointA;
+	out_collisionInfoA.pointB = collisionPointB;
+	out_collisionInfoA.rigidBodyA = rigidBodyA;
+	out_collisionInfoA.rigidBodyB = rigidBodyB;
+	out_collisionInfoA.Ucrel = uCRel;
+
 	
+	n = n*-1;
+	uRel = velocityB - velocityA;
+	uDotRelN = ((uRel.dot(n)));
+	uRelN = uDotRelN * n;
+	uCRel = -(rigidBodyB->getElasticity()*rigidBodyA->getElasticity())*uRelN;
+	
+	double factorB = collisionImpulsFactor(kBB, kAA, n);
 
-	imp=Vector3d(0, 0, 0);
 
-	//volumeB->collisionCalcBrianMitrich(rigidBodyB->toGlobalSpace(volumeB->m), relativeVelocityB, rigidBodyA->toGlobalSpace(volumeA->m), relativeVelocityA, kBB, kAA, imp);
-	volumeB->collisionCalcBrianMitrich(collisionPointB, relativeVelocityB, collisionPointA, relativeVelocityA, kBB, kAA, rigidBodyA->getElasticity(), rigidBodyB->getElasticity(), imp);
-	rigidBodyB->addRasImpuls(imp, rbs);
+	// Kollision
+	if (uDotRelN < 0)
+	{
+		// bleibender Kontakt
+		if (-episolon < uDotRelN && uDotRelN < episolon)
+		{
+			float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+			Vector3d nA = collisionPointA + timeStep*velocityA;
+			Vector3d nB = collisionPointB + timeStep*velocityB;
+			Vector3d nN = (nB - nA).normalized();
+			Real d = (nA - nB).dot(nN);
+
+			//uCRel = (1.0 / timeStep)*d*n;
+			deltaURelN = (1.0 / timeStep)*d*n;
+			deltaURelN = uCRel - uRel;
+
+		}
+		// Kollision
+		else if (uDotRelN <= -episolon)
+		{
+			// eventuell stuff;
+			deltaURelN = uCRel - uRel;
+		}
+		// kein Kontakt
+		else
+		{
+			// TODO
+			return false;
+		}
+	}
+	
+	uCRel = deltaURelN + velocityB;
+
+	out_collisionInfoB.n = n;
+	out_collisionInfoB.factor = factorB;
+	out_collisionInfoB.pointA = collisionPointB;
+	out_collisionInfoB.pointB = collisionPointA;
+	out_collisionInfoB.rigidBodyA = rigidBodyB;
+	out_collisionInfoB.rigidBodyB = rigidBodyA;
+	out_collisionInfoB.Ucrel = uCRel;
 
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);
-
-	
-	this->computeImpulse(rigidBodyA);
-	this->computeImpulse(rigidBodyB);
-
-
-
-	//Matrix3d kAA;
-	//Matrix3d kBB;
-	//calculateK(*rigidBodyA, relativeVelocityA, relativeVelocityA, kAA);
-	//calculateK(*rigidBodyB, relativeVelocityB, relativeVelocityB, kBB);
-	//double result = 0;
-	//collisionSolutionImpulse(volumeA, volumeB, kAA, kBB, 0, result);
-	// relic from the merge with commit  062c64037ef006416605299339dce43287ac9a97 [062c640]
-	/*
-	vector<RigidBody*> rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
-	collidedBoundingVolumes.clear();
-	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+	printf("Geschwindigkeit fuer Koerper A: %f, %f ,%f\n", out_collisionInfoA.Ucrel.x(), out_collisionInfoA.Ucrel.y(), out_collisionInfoA.Ucrel.z());
+	printf("Geschwindigkeit fuer Koerper B: %f, %f, %f\n", out_collisionInfoB.Ucrel.x(), out_collisionInfoB.Ucrel.y(), out_collisionInfoB.Ucrel.z());
+	if (rigidBodyA->isStatic() || rigidBodyB->isStatic())
 	{
-	checkCollisionWithYAxis(ridgedBodyA);
-
-	rigidbodysToCheck.erase(rigidbodysToCheck.begin());
-	*/
+		printf("factorA: %f\n", factorA);
+		printf("factorB: %f\n", factorB);
+	}
+	return true;
 }
 
-void Simulation::checkCollisionWithYAxis(RigidBody* rigidBody)
+void Simulation::checkCollisionWithYAxis(RigidBody* rigidBody, vector<CollisionInfo> & out_collisionInfo)
 {
 	// check root collision with Y axis
 	BoundingVolumeTreeNode * cubeNode = rigidBody->getVolumeTree()->getRoot();
@@ -1249,7 +1505,10 @@ void Simulation::checkCollisionWithYAxis(RigidBody* rigidBody)
 		else // node is leave
 		{
 			// real collision
-			cubeNode->getBoundingVolume()->collisionCalcYAxis(rigidBody->toGlobalSpace(cubeNode->getBoundingVolume()->m));
+			//cubeNode->getBoundingVolume()->collisionCalcYAxis(rigidBody->toGlobalSpace(cubeNode->getBoundingVolume()->m));
+			CollisionInfo collInfo;
+			collisionCalcYAxis(rigidBody, rigidBody->toGlobalSpace(cubeNode->getBoundingVolume()->m), *(cubeNode->getBoundingVolume()), collInfo);
+			out_collisionInfo.push_back(collInfo);
 			collidedBoundingVolumes.push_back(cubeNode->getBoundingVolume());
 
 			// go up

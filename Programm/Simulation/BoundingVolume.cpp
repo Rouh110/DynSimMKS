@@ -24,14 +24,16 @@ bool BoundingVolume::collisionTest(const Eigen::Vector3d &globalPositionA, Bound
 }
 
 void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, BoundingVolume* testVolume, const Eigen::Vector3d &globalPositionB){
+	/*
 	double x = globalPositionA.x() - globalPositionB.x();
 	double y = globalPositionA.y() - globalPositionB.y();
 	double z = globalPositionA.z() - globalPositionB.z();
 	double tmp = std::sqrt(pow(x,2) + pow(y,2) + pow(z,2));
-	
-	contactNormals.push_back((globalPositionA - globalPositionB) / tmp);
+	*/
+
+	contactNormals.push_back((globalPositionA - globalPositionB).normalized());
 	contactPoints.push_back( globalPositionA - this->r * contactNormals.back());
-	testVolume->contactPoints.push_back(globalPositionB - testVolume->r * contactNormals.back()*-1);
+	testVolume->contactPoints.push_back(globalPositionB - (testVolume->r * (contactNormals.back()*-1)));
 	testVolume->contactNormals.push_back(contactNormals.back() *-1);
 }
 
