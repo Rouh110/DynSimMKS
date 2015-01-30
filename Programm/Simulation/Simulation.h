@@ -18,9 +18,13 @@ public:
 	enum ApproximationMethod {EXPLICIT_EULER, RUNGE_KUTTA_4};
 	struct CollisionInfo
 	{
-		Real factor;
-		Vector3d n;
-		Vector3d Ucrel;
+		Real factorA;
+		Real factorB;
+		Vector3d nA;
+		Vector3d nB;
+		Vector3d uCRel;
+		Vector3d uCRelA;
+		Vector3d uCRelB;
 		Vector3d pointA;
 		Vector3d pointB;
 		RigidBody *rigidBodyA;
@@ -138,14 +142,14 @@ protected:
 	void computeVeloctyCorrection();
 
 	void checkCollision();
-	void checkCollision(Cube* rigidBodyA, Cube* rigidBodyB, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB);
-	void checkCollision(Sphere* sphereA, Sphere* sphereB, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB);
-	void checkCollision(Sphere* sphere, Cube* cube, vector<CollisionInfo> & out_collisionInfoA, vector<CollisionInfo> &out_collisionInfoB);
+	void checkCollision(Cube* rigidBodyA, Cube* rigidBodyB, vector<CollisionInfo> & out_collisionInfo);
+	void checkCollision(Sphere* sphereA, Sphere* sphereB, vector<CollisionInfo> & out_collisionInfo);
+	void checkCollision(Sphere* sphere, Cube* cube, vector<CollisionInfo> & out_collisionInfo);
 
-	bool collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB, CollisionInfo & out_collisionInfoA, CollisionInfo & out_collisionInfoB);
+	bool collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB, CollisionInfo & out_CollisionInfo);
 	
 	void checkCollisionWithYAxis(RigidBody* rigidBody, vector<CollisionInfo> & out_collisionInfo);
-	void collisionCalcYAxis(RigidBody * rigidBody, const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull, Simulation::CollisionInfo & out_CollisionInfo);
+	bool collisionCalcYAxis(RigidBody * rigidBody, const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull, Simulation::CollisionInfo & out_CollisionInfo);
 	void computeCollisionCorrection(const vector<CollisionInfo>& collisions);
 	
 	/*

@@ -70,7 +70,14 @@ void RigidBody::getVelocityOfLocalPoint(const Eigen::Vector3d & point, Eigen::Ve
 
 void RigidBody::getVelocityOfGlobalPoint(const Eigen::Vector3d & point, Eigen::Vector3d & out_velocity) const
 {
-	getVelocityOfLocalPoint(point-position,out_velocity);
+	if (!isStatic())
+	{
+		out_velocity = velocity + angulaVelocity.cross(point - position);
+	}
+	else
+	{
+		out_velocity = Vector3d::Zero();
+	}
 }
 
 const Eigen::Vector3d& RigidBody::getAngulaVelocity() const
