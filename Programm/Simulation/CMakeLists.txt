@@ -10,6 +10,8 @@ ADD_EXECUTABLE(Simulation
 	  SimMath.h
 	  TimeManager.cpp
 	  TimeManager.h
+	  Collision.h
+	  Collision.cpp
 	  Cube.cpp
 	  Cube.h
 	  IForce.cpp

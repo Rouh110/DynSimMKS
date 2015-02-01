@@ -1,6 +1,7 @@
 #pragma once
 #include "Eigen/Dense"
 #include "RigidBody.h"
+#include "Collision.h"
 #include "Sphere.h"
 #include "Cube.h"
 #include "Common\Config.h"
@@ -25,7 +26,10 @@ protected:
 public:
 	Simulation();
 	~Simulation();
-
+	const double errorVelConst = 0.0000005;
+	list<Collision*> currentCollisions;
+	int z = 0;
+	void calcNewUrelForAllVolumes();
 	/*
 	Sets the Method that will be used for calculation the next step.
 	*/
@@ -39,6 +43,7 @@ public:
 	*/
 	void setCollisionCheck(bool check);
 	bool getCollisionCheck();
+	void calcConstantNormalDirection(const Matrix3d &kaa, const Vector3d &normalA, const Eigen::Matrix3d &kbb, double &result);
 
 	/*
 	Calculate the matrix K vor the given RigidBody.

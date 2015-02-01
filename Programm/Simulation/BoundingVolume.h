@@ -13,12 +13,18 @@ using namespace std;
 class BoundingVolume
 {
 public:
+	BoundingVolume();
 	BoundingVolume(Vector3d mRef, double rRef);
 	~BoundingVolume();
 	Vector3d m;
 	double r;
 	list<Vector3d> contactNormals;
+	vector<Vector3d> contactNormalsVec;
 	list<Vector3d> contactPoints;
+	vector<Vector3d> contactPointsVec;
+	Vector3d urelcvelocity;
+	Vector3d urelvelocity;
+	int collisionOrNoCollisionThatIsHereTheQuestion;
 	//Vector3d contactPoint;
 	//Vector3d contactNormal;
 	bool collisionTestYAxis(const Vector3d &globalPosition);
@@ -29,7 +35,7 @@ public:
 	/*
 	after CollisionCalc use this function to calculate the Impulse
 	*/
-	void collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel,const double &elasticityA,const double &elasticityB, Vector3d & result);
+	void collisionSolutionImpulse(const double constantNormalDistance, Vector3d& deltaurel, Vector3d & result);
 	void contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel, Vector3d & result, const  Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const  Vector3d &globalPositionB, const Vector3d &relativeVelocityB, Vector3d &n_t0);
 
 };

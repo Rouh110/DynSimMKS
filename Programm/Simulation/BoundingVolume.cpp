@@ -1,6 +1,8 @@
 #include "BoundingVolume.h"
 #include <math.h>
+BoundingVolume::BoundingVolume(){
 
+}
 BoundingVolume::BoundingVolume(Eigen::Vector3d mRef, double rRef)
 {
 	m = mRef;
@@ -31,8 +33,12 @@ void BoundingVolume::collisionCalc(const Eigen::Vector3d &globalPositionA, Bound
 	
 	contactNormals.push_back((globalPositionA - globalPositionB) / tmp);
 	contactPoints.push_back( globalPositionA - this->r * contactNormals.back());
+	contactPointsVec.push_back(globalPositionA - this->r * contactNormals.back());
+	contactNormalsVec.push_back((globalPositionA - globalPositionB) / tmp);
 	testVolume->contactPoints.push_back(globalPositionB - testVolume->r * contactNormals.back()*-1);
 	testVolume->contactNormals.push_back(contactNormals.back() *-1);
+	testVolume->contactPointsVec.push_back(globalPositionB - testVolume->r * contactNormals.back()*-1);
+	testVolume->contactNormalsVec.push_back(contactNormals.back() *-1);
 }
 
 void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPositionA, const Vector3d &relativeVelocityA, const Vector3d &globalPositionB, const Eigen::Vector3d &relativeVelocityB, const Matrix3d &kAA, const Matrix3d &kBB, const double &elasticityA, const double &elasticityB, Vector3d &imp){
@@ -76,7 +82,7 @@ void BoundingVolume::collisionCalcBrianMitrich(const Eigen::Vector3d &globalPosi
 		{
 			printf("colision\n");
 			Vector3d result;
-			collisionSolutionImpulse(kAA, kBB, uRelN, elasticityA, elasticityB ,result);
+		//	collisionSolutionImpulse(kAA, kBB, uRelN, result);
 			imp = result;
 		}
 		// kein Kontakt
@@ -110,9 +116,8 @@ void BoundingVolume::contactSolutionImpulse(const Matrix3d& kaa, const Matrix3d&
 	// Impuls in normalenrichtung
 	result = (1 / (this->contactNormals.back().transpose() * (kaa + kbb) * this->contactNormals.back()))*deltaURelN;
 }
-void BoundingVolume::collisionSolutionImpulse(const Matrix3d& kaa, const Matrix3d& kbb, Vector3d& urel,const double &elasticityA,const double&elasticityB, Vector3d & result){
-	Vector3d deltaURelN = (-(elasticityA*elasticityB) * urel) - urel;
-	result = (1 / (this->contactNormals.back().transpose() * (kaa + kbb) * this->contactNormals.back()))*deltaURelN;
+void BoundingVolume::collisionSolutionImpulse(const double constantNormalDistance, Vector3d& deltaurel, Vector3d & result){
+	result = constantNormalDistance * deltaurel;
 }
 bool BoundingVolume::collisionTestYAxis(const Eigen::Vector3d &globalPosition){
 	if ((globalPosition.y() - this->r) <= 0){

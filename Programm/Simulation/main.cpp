@@ -333,6 +333,8 @@ void render ()
 			}
 			bv->contactNormals.clear();
 			bv->contactPoints.clear();
+			bv->contactNormalsVec.clear();
+			bv->contactPointsVec.clear();
 		}
 	}
 	else

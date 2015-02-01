@@ -1,7 +1,8 @@
 #include "Simulation.h"
 #include"Simulation\TimeManager.h"
 #include "SimulationManager.h"
-
+#include "Collision.h"
+#include <iostream>
 using namespace IBDS;
 
 Simulation::Simulation()
@@ -57,9 +58,11 @@ void Simulation::update(Real h)
 	//simulateJointsPredictorCorrector(h);
 	resetForces();
 
-	if (collisionCheck)
+	if (collisionCheck){
 		checkCollision();
-
+		calcNewUrelForAllVolumes();
+	}
+	currentCollisions.clear();
 }
 
 void Simulation::resetForces()
@@ -906,6 +909,8 @@ void Simulation::checkCollision()
 			
 		}
 	}	
+	cout << "Collisions: " << currentCollisions.size() << "\n" << flush;
+//	if(currentCollisions.size() > 0)system("pause");
 }
 
 
@@ -1133,13 +1138,142 @@ void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB)
 	}
 }
 
+void Simulation::calcNewUrelForAllVolumes(){
+	bool moreCollisions = true;
+	
+	while (moreCollisions){
+		int j = 0;
+		moreCollisions = false;
+		cout << "Collision in currentCollision: " << currentCollisions.size() << "\n" << flush;
+		for each(Collision* col in currentCollisions){
+			cout << "CurrentCollisions: " << col->collisionOrNoCollisionA << " und " << col->collisionOrNoCollisionB << "\n" << flush;
+			int i = 0;
+			Vector3d deltaUrel = col->uRelCA - col->uRelNA;
+			double deltaEuklidUrel = sqrt(pow(deltaUrel.x(), 2) + pow(deltaUrel.y(), 2) + pow(deltaUrel.z(), 2));
+			//	cout << "I like it \n" << flush;
+			cout << "Delta: " << deltaEuklidUrel << " error: " << errorVelConst << " \n " << flush;
+			while ((deltaEuklidUrel > errorVelConst || deltaEuklidUrel < -errorVelConst) && i < 10){
+				if (col->collisionOrNoCollisionA == 1){
+						col->collidedVolumeA.collisionSolutionImpulse(col->constNormalA, deltaUrel, col->lastImpulseA);
+						cout << "Impulse: " << col->lastImpulseA << "\n" << flush;
+						col->rigidA->addRasImpuls(col->lastImpulseA, col->contactPointA - col->rigidA->getPosition());
+						computeImpulse(col->rigidA);
+					
+						col->rigidA->getVelocityOfGlobalPoint(col->rigidA->toGlobalSpace(col->contactPointA), col->relativeA);
+						col->rigidB->getVelocityOfGlobalPoint(col->rigidB->toGlobalSpace(col->contactPointB), col->relativeB);
+						col->calcURelN(col->relativeA, col->contactNormalA, col->relativeB, col->uRelNA);
+				}
+				else if (col->collisionOrNoCollisionA == 0) {
+					float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+					// euler schritt
+					Vector3d a_th = col->rigidA->getPosition() + timeStep*col->relativeA;
+					Vector3d b_th = col->rigidB->getPosition() + timeStep*col->relativeB;
+
+					double x = col->rigidB->getPosition().x() - col->rigidA->getPosition().x();
+					double y = col->rigidB->getPosition().y() - col->rigidA->getPosition().y();
+					double z = col->rigidB->getPosition().z() - col->rigidA->getPosition().z();
+					double tmp = std::sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+					Vector3d n_th = (col->rigidB->getPosition() - col->rigidA->getPosition()) / tmp;
+
+					// bestimmung der eindrungstiefe
+					Vector3d newPos = (b_th - a_th);
+					double dn_th = (newPos[0] * n_th[0] + newPos[1] * n_th[1] + newPos[2] * n_th[2]);
+					// berechnung deltaURelN
+					Vector3d deltaURelN = 1 / timeStep * dn_th * col->contactNormalA;
+
+					// Impuls in normalenrichtung
+					col->lastImpulseA = col->constNormalA*deltaURelN;
+					col->rigidA->addRasImpuls(col->lastImpulseA, col->contactPointA - col->rigidA->getPosition());
+					computeImpulse(col->rigidA);
+
+					col->rigidA->getVelocityOfGlobalPoint(col->rigidA->toGlobalSpace(col->contactPointA), col->relativeA);
+					col->rigidB->getVelocityOfGlobalPoint(col->rigidB->toGlobalSpace(col->contactPointB), col->relativeB);
+					col->calcURelN(col->relativeA, col->contactNormalA, col->relativeB, col->uRelNA);
+				}
+				i++;
+			}
+			deltaUrel = col->uRelCB - col->uRelNB;
+			i = 0;
+			deltaEuklidUrel = sqrt(pow(deltaUrel.x(), 2) + pow(deltaUrel.y(), 2) + pow(deltaUrel.z(), 2));
+			while ((deltaEuklidUrel > errorVelConst && deltaEuklidUrel < -errorVelConst) && i < 10){
+				if (col->collisionOrNoCollisionB == 1){
+						col->collidedVolumeB.collisionSolutionImpulse(col->constNormalB, deltaUrel, col->lastImpulseB);
+						col->rigidA->addRasImpuls(col->lastImpulseB, col->contactPointB - col->rigidB->getPosition());
+						computeImpulse(col->rigidB);
+						Vector3d relativeA, relativeB;
+						col->rigidA->getVelocityOfGlobalPoint(col->rigidA->toGlobalSpace(col->contactPointA), relativeA);
+						col->rigidB->getVelocityOfGlobalPoint(col->rigidB->toGlobalSpace(col->contactPointB), relativeB);
+						col->calcURelN(relativeB, col->contactNormalB, relativeA, col->uRelNB);
+				}
+				else if (col->collisionOrNoCollisionB == 0) {
+
+					float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
+					// euler schritt
+					Vector3d a_th = col->rigidB->getPosition() + timeStep*col->relativeB;
+					Vector3d b_th = col->rigidA->getPosition() + timeStep*col->relativeA;
+
+					double x = col->rigidA->getPosition().x() - col->rigidB->getPosition().x();
+					double y = col->rigidA->getPosition().y() - col->rigidB->getPosition().y();
+					double z = col->rigidA->getPosition().z() - col->rigidB->getPosition().z();
+					double tmp = std::sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+					Vector3d n_th = (col->rigidA->getPosition() - col->rigidB->getPosition()) / tmp;
+
+					// bestimmung der eindrungstiefe
+					Vector3d newPos = (b_th - a_th);
+					double dn_th = (newPos[0] * n_th[0] + newPos[1] * n_th[1] + newPos[2] * n_th[2]);
+					// berechnung deltaURelN
+					Vector3d deltaURelN = 1 / timeStep * dn_th * col->contactNormalB;
+
+					// Impuls in normalenrichtung
+					col->lastImpulseB =		col->constNormalB*deltaURelN;
+					col->rigidB->addRasImpuls(col->lastImpulseB, col->contactPointB - col->rigidB->getPosition());
+
+					col->rigidA->getVelocityOfGlobalPoint(col->rigidA->toGlobalSpace(col->contactPointA), col->relativeA);
+					col->rigidB->getVelocityOfGlobalPoint(col->rigidB->toGlobalSpace(col->contactPointB), col->relativeB);
+					col->calcURelN(col->relativeB, col->contactNormalB, col->relativeA, col->uRelNB);		
+				}
+				i++;
+			}
+			col->collisionOrNotCollision(col->relativeA, col->contactNormalA, col->relativeB, col->collisionOrNoCollisionA);
+			col->collisionOrNotCollision(col->relativeB, col->contactNormalB, col->relativeA, col->collisionOrNoCollisionB);
+			cout << "Collision A: " << col->collisionOrNoCollisionA << " Collision B: " << col->collisionOrNoCollisionB << " next \n" << flush;
+			if (col->collisionOrNoCollisionA != 2 && col->collisionOrNoCollisionB != 2)
+			moreCollisions = true;
+		}
+		//if (j < 100) moreCollisions = false;
+	}
+}
+void Simulation::calcConstantNormalDirection(const Matrix3d &kaa, const Vector3d &normalA, const Eigen::Matrix3d &kbb, double &result)
+{
+	result = (1 / (normalA.transpose() * (kaa + kbb) * normalA));
+}
 void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB)
 {
 	volumeA->collisionCalc(rigidBodyA->toGlobalSpace(volumeA->m), volumeB, rigidBodyB->toGlobalSpace(volumeB->m));
-
+	cout << "Collision Calc Aufurf: " << z << "\n" << flush;
+	z++;
+	if (volumeA->contactNormalsVec.size() == volumeB->contactNormalsVec.size()){
+		for (int i = 0; i < volumeA->contactNormalsVec.size(); i++){
+			Vector3d d;
+			//cout << volumeA->contactPointsVec.at(i) << "collidePoint" << flush;
+			Matrix3d kAA;
+			Matrix3d kBB;
+			Vector3d ras = volumeA->contactNormalsVec.at(i) - rigidBodyA->getPosition();
+			Vector3d rbs = volumeB->contactNormalsVec.at(i) - rigidBodyB->getPosition();
+			calculateK(*rigidBodyB, ras, ras, kAA);
+			calculateK(*rigidBodyB, rbs, rbs, kBB);
+			double constNormalA;
+			double constNormalB;
+			calcConstantNormalDirection(kAA, volumeA->contactNormalsVec.at(i), kBB, constNormalA);
+			calcConstantNormalDirection(kBB, volumeB->contactNormalsVec.at(i), kAA, constNormalB);
+			currentCollisions.push_back(
+			new Collision(rigidBodyA, rigidBodyB, *volumeA, *volumeB, volumeA->contactNormalsVec.at(i), volumeB->contactNormalsVec.at(i)
+				, volumeA->contactPointsVec.at(i), volumeB->contactPointsVec.at(i),constNormalA,constNormalB));
+			
+		}
+	}
+	
 	/*
-	Brian Mitrich Collision
-	*/
 	Vector3d collisionPointA = volumeA->contactPoints.back();
 	Vector3d collisionPointB = volumeB->contactPoints.back();
 	Vector3d ras = collisionPointA-rigidBodyA->getPosition();
@@ -1166,14 +1300,14 @@ void Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 	volumeB->collisionCalcBrianMitrich(collisionPointB, relativeVelocityB, collisionPointA, relativeVelocityA, kBB, kAA, rigidBodyA->getElasticity(), rigidBodyB->getElasticity(), imp);
 	rigidBodyB->addRasImpuls(imp, rbs);
 
-	collidedBoundingVolumes.push_back(volumeA);
-	collidedBoundingVolumes.push_back(volumeB);
-
+	
 	
 	this->computeImpulse(rigidBodyA);
 	this->computeImpulse(rigidBodyB);
 
-
+	*/
+	collidedBoundingVolumes.push_back(volumeA);
+	collidedBoundingVolumes.push_back(volumeB);
 
 	//Matrix3d kAA;
 	//Matrix3d kBB;
