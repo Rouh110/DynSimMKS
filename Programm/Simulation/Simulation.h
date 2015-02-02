@@ -22,6 +22,7 @@ public:
 		Real factorB;
 		Vector3d nA;
 		Vector3d nB;
+		Vector3d deltaURelN;
 		Vector3d uCRel;
 		Vector3d uCRelA;
 		Vector3d uCRelB;
@@ -151,6 +152,8 @@ protected:
 	void checkCollisionWithYAxis(RigidBody* rigidBody, vector<CollisionInfo> & out_collisionInfo);
 	bool collisionCalcYAxis(RigidBody * rigidBody, const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull, Simulation::CollisionInfo & out_CollisionInfo);
 	void computeCollisionCorrection(const vector<CollisionInfo>& collisions);
+
+	void brianMitrichCheck(const vector<CollisionInfo>& collisions, vector<CollisionInfo>& result);
 	
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
