@@ -17,7 +17,7 @@ void SceneCollisionTest03::initializeScene()
 
 	Real x1 = 0;
 	Real x2 = 3;
-	Real y1 = 0.7;
+	Real y1 = 0.5;
 	Real y2 = 3;
 
 	Cube &cube01 = Cube::create();
@@ -35,8 +35,11 @@ void SceneCollisionTest03::initializeScene()
 	Cube &cube06 = Cube::create();
 	cube06.setPosition(Vector3d(x1, (y2+6), 0));
 	*/
-	Cube &cube07 = Cube::create();
-	cube07.setPosition(Vector3d(x2, y1, 0));
+	//Cube &cube07 = Cube::create();
+	//cube07.setPosition(Vector3d(x2, y1, 0));
+
+	Sphere &sphere01 = Sphere::create(0.5);
+	sphere01.setPosition(Vector3d(x2+1.5,y1,0));
 
 }
 

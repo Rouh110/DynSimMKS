@@ -864,7 +864,7 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 
 	cout << "computeCollisionCorrection \n\n\n\n" << endl;
 	double maxError = 0.0001;
-	int maxIterations = 100;
+	int maxIterations = 1;
 	bool finnish;
 	int i = 0;
 	
@@ -960,12 +960,49 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 				imp = Vector3d::Zero();
 			}
 			*/
+			deltaURelN = collInfo.deltaURelN - collInfo.nA.dot(velA - velB)*collInfo.nA;
+			//deltaURelN = collInfo.deltaURelN - (velA - velB);
 
-			// correction for rigidBodyA
+			if (abs(deltaURelN.norm()) <= maxError)
+			{
+				++impIt;
+				++impIt;
+				continue;
+			}
+			finnish = false;
+
 			if (collInfo.rigidBodyA != 0)
 			{
-				//deltaURelN = collInfo.uCRel - collInfo.nA.dot(velA - velB)*collInfo.nA;
-				deltaURelN = collInfo.uCRel - (velA - velB);
+				imp = collInfo.factorA * deltaURelN;
+
+				if (collInfo.nA.dot((*impIt) + imp) < 0)
+				{
+					//imp = (*impIt) *-1;
+				}
+
+				collInfo.rigidBodyA->addRasImpuls(imp, collInfo.pointA - collInfo.rigidBodyA->getPosition());
+			}
+			++impIt;
+			if (collInfo.rigidBodyB != 0)
+			{
+				imp = -imp;
+				//imp = collInfo.factorB * -deltaURelN;
+
+				if (collInfo.nB.dot((*impIt) + imp) < 0)
+				{
+					//imp = (*impIt) *-1;
+				}
+
+				collInfo.rigidBodyB->addRasImpuls(imp, collInfo.pointB - collInfo.rigidBodyB->getPosition());
+			}
+			++impIt;
+
+			// correction for rigidBodyA
+			/*
+			if (collInfo.rigidBodyA != 0)
+			{
+				deltaURelN = collInfo.deltaURelN - collInfo.nA.dot(velA - velB)*collInfo.nA;
+				//deltaURelN = collInfo.deltaURelN - (velA - velB);
 
 				if (abs(deltaURelN.norm()) <= maxError)
 				{
@@ -991,7 +1028,7 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 			
 			
 			++impIt;
-			
+			*/
 			/*
 			if (collInfo.rigidBodyB->isStatic())
 			{
@@ -1018,14 +1055,14 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 			
 			
 			
-
+			/*
 			//correction for rigidBodyB
 
 			if (collInfo.rigidBodyB != 0)
 			{
 				//deltaURelN = deltaURelN*-1;
-				//deltaURelN = collInfo.uCRelB - collInfo.nB.dot(velB - velA) * collInfo.nB;
-				deltaURelN = collInfo.uCRelB - (velB - velA);
+				deltaURelN = collInfo.deltaURelN - collInfo.nB.dot(velB - velA) * collInfo.nB;
+				//deltaURelN = collInfo.deltaURelN - (velB - velA);
 				if (collInfo.rigidBodyA == 0)
 				{
 					if (abs(deltaURelN.norm()) <= maxError)
@@ -1040,7 +1077,7 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 				
 
 				//imp = imp*-1;
-				imp = collInfo.factorB * deltaURelN;
+				imp = collInfo.factorB * -deltaURelN;
 				if (collInfo.nB.dot((*impIt) + imp) < 0)
 				{
 					imp = (*impIt) *-1;
@@ -1055,7 +1092,7 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 			}
 
 			++impIt;
-
+			*/
 			/*
 			if (collInfo.rigidBodyA != 0 && collInfo.rigidBodyB != 0)
 			{
@@ -1105,55 +1142,66 @@ void Simulation::checkCollision()
 
 	vector<CollisionInfo> collInfoA;
 	vector<CollisionInfo> collInfoB;
+	vector<CollisionInfo> collisionsToCompute;
 
-	do
+	rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
+
+	for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
 	{
-		rigidbodysToCheck = SimulationManager::getInstance()->getObjectManager().getRigidBodies();
+		rigidbodysToCheck.erase(rigidbodysToCheck.begin());
 
-		for each (RigidBody* ridgedBodyA in SimulationManager::getInstance()->getObjectManager().getRigidBodies())
+		checkCollisionWithYAxis(ridgedBodyA, collInfoA);
+
+		cubeA = dynamic_cast<Cube*>(ridgedBodyA);
+		sphereA = dynamic_cast<Sphere*>(ridgedBodyA);
+
+		for each (RigidBody* ridgedBodyB in rigidbodysToCheck)
 		{
-			rigidbodysToCheck.erase(rigidbodysToCheck.begin());
+			cubeB = dynamic_cast<Cube*>(ridgedBodyB);
+			sphereB = dynamic_cast<Sphere*>(ridgedBodyB);
 
-			checkCollisionWithYAxis(ridgedBodyA, collInfoA);
-
-			cubeA = dynamic_cast<Cube*>(ridgedBodyA);
-			sphereA = dynamic_cast<Sphere*>(ridgedBodyA);
-
-			for each (RigidBody* ridgedBodyB in rigidbodysToCheck)
+			if (sphereA != 0 || sphereB != 0)
 			{
-				cubeB = dynamic_cast<Cube*>(ridgedBodyB);
-				sphereB = dynamic_cast<Sphere*>(ridgedBodyB);
-
-				if (sphereA != 0 || sphereB != 0)
+				if (sphereA != 0)
 				{
-					if (sphereA != 0)
+					if (sphereB != 0)
 					{
-						if (sphereB != 0)
-						{
-							checkCollision(sphereA, sphereB, collInfoA);
-						}
-						else
-						{
-							checkCollision(sphereA, cubeB, collInfoA);
-						}
-
+						checkCollision(sphereA, sphereB, collInfoA);
 					}
 					else
 					{
-						checkCollision(sphereB, cubeA, collInfoA);
+						checkCollision(sphereA, cubeB, collInfoA);
 					}
+
 				}
 				else
 				{
-
-					checkCollision(cubeA, cubeB, collInfoA);
+					checkCollision(sphereB, cubeA, collInfoA);
 				}
-
 			}
-		}
-		//collInfoA.insert(collInfoA.end(), collInfoB.begin(), collInfoB.end());
-		computeCollisionCorrection(collInfoA);
+			else
+			{
 
+				checkCollision(cubeA, cubeB, collInfoA);
+			}
+
+		}
+	}
+
+	do
+	{
+		brianMitrichCheck(collInfoA, collisionsToCompute);
+		//collInfoA.insert(collInfoA.end(), collInfoB.begin(), collInfoB.end());
+		if (collisionsToCompute.size() > 0)
+		{
+			computeCollisionCorrection(collisionsToCompute);
+			collisionsToCompute.clear();
+		}
+		else
+		{
+			break;
+		}
+		
 		++i;
 	} while (i < maxIterations);
 	
@@ -1391,15 +1439,10 @@ void Simulation::checkCollision(Cube* rigidBodyA, Cube* rigidBodyB, vector<Colli
 	}
 }
 
-
-
-
-
 Real collisionImpulsFactor(const Matrix3d& Kaa, const Matrix3d& Kbb, const Vector3d &n)
 {
 	return 1 / (n.transpose()*(Kaa + Kbb)*n);
 }
-
 
 bool collisionTestYAxis(const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull){
 	if ((globalPosition.y() - collHull.r) <= 0){
@@ -1410,63 +1453,21 @@ bool collisionTestYAxis(const Eigen::Vector3d &globalPosition, const BoundingVol
 
 bool Simulation::collisionCalcYAxis(RigidBody * rigidBody, const Eigen::Vector3d &globalPosition, const BoundingVolume & collHull, Simulation::CollisionInfo & out_CollisionInfo){
 	
-	Vector3d pointA = globalPosition - collHull.r * Vector3d(0, 1, 0);
-	Vector3d pointVelocity;
-	rigidBody->getVelocityOfGlobalPoint(pointA, pointVelocity);
-	
+	Vector3d pointA = globalPosition - collHull.r * Vector3d(0, 1, 0);	
 	Vector3d n = Vector3d(0, 1, 0);
-	Eigen::Vector3d uRel = pointVelocity;
-	double uDotRelN = ((uRel.dot(n)));
-	Eigen::Vector3d uRelN = uDotRelN * n;
 	Vector3d ras = pointA - rigidBody->getPosition();
 	Matrix3d kAA;
 	Matrix3d kBB = Matrix3d::Zero();
 	calculateK(*rigidBody, ras, ras, kAA);
 	double factor = collisionImpulsFactor(kAA, kBB, n);
-	double episolon = std::sqrt(2 * 9.81 * 0.01);
-	Vector3d uCRel = ((-(rigidBody->getElasticity()*rigidBody->getElasticity())*uRelN));
-	Vector3d deltaURelN = pointVelocity;
-	// Kollision
-	if (uDotRelN < 0)
-	{
-		// bleibender Kontakt
-		if (-episolon < uDotRelN && uDotRelN < episolon)
-		{
-			float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
-			Vector3d nextPointA = pointA + timeStep*pointVelocity;
-			Vector3d nextPointB = Vector3d(pointA.x(), 0, pointA.y());
-			Vector3d nextN = (nextPointA - nextPointB).normalized();
-			Real d = (nextPointB - nextPointB).dot(nextN);
-
-			deltaURelN = (1.0 / timeStep)*d*n;
-			//deltaURelN = uCRel - uRel;
-		}
-		// Kollision
-		else if (uDotRelN <= -episolon)
-		{
-			// eventuell stuff;
-			deltaURelN = uCRel - uRel;
-		}
-		// kein Kontakt
-		else
-		{
-			// TODO
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
 
 	out_CollisionInfo.rigidBodyB = 0;
 	out_CollisionInfo.nA = n;
-	out_CollisionInfo.pointB = Vector3d::Zero();
+	out_CollisionInfo.pointB = Vector3d(pointA.x(), 0, pointA.y());
 	out_CollisionInfo.pointA = pointA;
 	out_CollisionInfo.rigidBodyA = rigidBody;
-	out_CollisionInfo.uCRel = deltaURelN*0.5;
-	out_CollisionInfo.uCRelA = out_CollisionInfo.uCRel;
-	out_CollisionInfo.factorA = factor*0.5;
+	out_CollisionInfo.factorA = factor;
+	out_CollisionInfo.factorB = 0;
 
 	return true;
 }
@@ -1480,129 +1481,26 @@ bool Simulation::collisionCalc(RigidBody* rigidBodyA, BoundingVolume* volumeA, R
 	Vector3d collisionPointB = volumeB->contactPoints.back();
 	Vector3d ras = collisionPointA-rigidBodyA->getPosition();
 	Vector3d rbs = collisionPointB - rigidBodyB->getPosition();
-
 	Vector3d n = volumeA->contactNormals.back();
-
-
-
-	Vector3d velocityA; 
-	Vector3d velocityB;
-	rigidBodyA->getVelocityOfGlobalPoint(collisionPointA, velocityA);
-	rigidBodyB->getVelocityOfGlobalPoint(collisionPointB, velocityB);
 
 	Matrix3d kAA;
 	Matrix3d kBB;
 	calculateK(*rigidBodyA, ras, ras, kAA);
 	calculateK(*rigidBodyB, rbs, rbs, kBB);
-
-	Eigen::Vector3d uRel = velocityA - velocityB;
-	double uDotRelN = ((uRel.dot(n)));
-	Eigen::Vector3d uRelN = uDotRelN * n;
-	Vector3d uCRel = -(rigidBodyA->getElasticity()*rigidBodyB->getElasticity())*uRelN;
 	double factorA = collisionImpulsFactor(kAA, kBB, n);
-
-
-	double episolon = std::sqrt(2 * 9.81 * 0.01);
-	Vector3d deltaURelN;
-
-	// Kollision
-	if (uDotRelN < 0)
-	{
-		// bleibender Kontakt
-		if (-episolon < uDotRelN && uDotRelN < episolon)
-		{
-			float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
-			Vector3d nA = collisionPointA + timeStep*velocityA;
-			Vector3d nB = collisionPointB + timeStep*velocityB;
-			Vector3d nN = (nA - nB).normalized();
-			Real d = (nB - nA).dot(nN);
-
-			deltaURelN = (1.0 / timeStep)*d*n;
-			//deltaURelN = uCRel - uRel;
-		}
-		// Kollision
-		else if (uDotRelN <= -episolon)
-		{
-			// eventuell stuff;
-			deltaURelN = uCRel - uRel;
-		}
-		// kein Kontakt
-		else
-		{
-			// TODO
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
-
-	
-
-	//uCRel = deltaURelN + velocityA;
-	uCRel = deltaURelN *0.5;
 
 	out_CollisionInfo.rigidBodyA = rigidBodyA;
 	out_CollisionInfo.rigidBodyB = rigidBodyB;
-	out_CollisionInfo.factorA = factorA/2;
+	out_CollisionInfo.factorA = factorA;
 	out_CollisionInfo.nA = n;
-	out_CollisionInfo.uCRel = uCRel;
-	out_CollisionInfo.uCRelA = uCRel;
 	out_CollisionInfo.pointA = collisionPointA;
 	out_CollisionInfo.pointB = collisionPointB;
 	
 	n = n*-1;
-	uRel = velocityB - velocityA;
-	uDotRelN = ((uRel.dot(n)));
-	uRelN = uDotRelN * n;
-	uCRel = -(rigidBodyB->getElasticity()*rigidBodyA->getElasticity())*uRelN;
-	
 	double factorB = collisionImpulsFactor(kBB, kAA, n);
 
-
-	// Kollision
-	if (uDotRelN < 0)
-	{
-		// bleibender Kontakt
-		if (-episolon < uDotRelN && uDotRelN < episolon)
-		{
-			float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
-			Vector3d nA = collisionPointA + timeStep*velocityA;
-			Vector3d nB = collisionPointB + timeStep*velocityB;
-			Vector3d nN = (nB - nA).normalized();
-			Real d = (nA - nB).dot(nN);
-
-			//uCRel = (1.0 / timeStep)*d*n;
-			deltaURelN = (1.0 / timeStep)*d*n;
-			//deltaURelN = uCRel - uRel;
-
-		}
-		// Kollision
-		else if (uDotRelN <= -episolon)
-		{
-			// eventuell stuff;
-			deltaURelN = uCRel - uRel;
-		}
-		// kein Kontakt
-		else
-		{
-			// TODO
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
-	
-	//uCRel = deltaURelN + velocityB;
-	uCRel = deltaURelN*0.5;
-
-	
-	out_CollisionInfo.factorB = factorB/2;
+	out_CollisionInfo.factorB = factorB;
 	out_CollisionInfo.nB = n;
-	out_CollisionInfo.uCRelB = uCRel;
 
 	collidedBoundingVolumes.push_back(volumeA);
 	collidedBoundingVolumes.push_back(volumeB);
@@ -1702,6 +1600,7 @@ void Simulation::checkCollisionWithYAxis(RigidBody* rigidBody, vector<CollisionI
 void Simulation::brianMitrichCheck(const vector<CollisionInfo>& collisions, vector<CollisionInfo>& result)
 {
 	double epsilonC = 0.01;
+	double gravity = 9.81;
 
 	Vector3d velocityPointA;
 	Vector3d velocityPointB;
@@ -1714,7 +1613,7 @@ void Simulation::brianMitrichCheck(const vector<CollisionInfo>& collisions, vect
 	double elasticityA;
 	double elasticityB;
 
-	double episolon = std::sqrt(2 * 9.81 * epsilonC);
+	double episolon = std::sqrt(2 * gravity * epsilonC);
 
 	for each (CollisionInfo collision in collisions)
 	{
@@ -1753,19 +1652,31 @@ void Simulation::brianMitrichCheck(const vector<CollisionInfo>& collisions, vect
 			if (-episolon < uDotRelN && uDotRelN < episolon)
 			{
 				float timeStep = IBDS::TimeManager::getCurrent()->getTimeStepSize();
-				Vector3d nA = collision.pointA + timeStep*velocityPointA;
-				Vector3d nB = collision.pointB + timeStep*velocityPointB;
+				Vector3d nA = collision.pointA + timeStep*(velocityPointA);
+				Vector3d nB;
+				if (collision.rigidBodyB == 0)
+				{
+					//nB = collision.pointB + timeStep*(velocityPointB);
+					nB = Vector3d(nA.x(),0 ,nA.z());
+				}
+				else
+				{
+					nB = collision.pointB + timeStep*(velocityPointB);
+				}
+				 
 				Vector3d nN = (nA - nB).normalized();
-				Real d = (nB - nA).dot(nN);
+				Real d = (nA - nB).dot(nN);
 
 				deltaURelN = (1.0 / timeStep)*d*collision.nA;
+				deltaURelN *= 0.5;
+				//cout << "deltaURelN with bleibender kontact\n" << deltaURelN;
 				//deltaURelN = uCRel - uRel;
 			}
 			// Kollision
 			else if (uDotRelN <= -episolon)
 			{
 				// eventuell stuff;
-				deltaURelN = uCRel - uRel;
+				deltaURelN = uCRel - uRelN;
 			}
 			// kein Kontakt
 			else
