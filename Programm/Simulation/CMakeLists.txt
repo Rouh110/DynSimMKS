@@ -62,6 +62,10 @@ ADD_EXECUTABLE(Simulation
 	  SceneCollisionTest01.h
 	  SceneCollisionTest02.cpp
 	  SceneCollisionTest02.h
+	  SceneStressTest01.cpp
+	  SceneStressTest01.h
+	  SceneStressTest02.cpp
+	  SceneStressTest02.h
 	  ${VIS_FILES}                    
 	  ${PROJECT_PATH}/Common/Config.h			  
 	  ${PROJECT_PATH}/Common/StringTools.h			  

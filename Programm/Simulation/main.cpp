@@ -47,6 +47,8 @@
 #include "SceneBoundingVolumeTwo.h"
 #include "SceneCollisionTest01.h"
 #include "SceneCollisionTest02.h"
+#include "SceneStressTest01.h"
+#include "SceneStressTest02.h"
 #include <list>
 
 
@@ -299,6 +301,8 @@ void addScenes()
 	addScene(new SceneBoundingVolumeTwo());
 	addScene(new SceneCollisionTest01());
 	addScene(new SceneCollisionTest02());
+	addScene(new SceneStressTest01());
+	addScene(new SceneStressTest02());
 }
 
 void buildModel ()
