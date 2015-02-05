@@ -1,6 +1,7 @@
 #include "SceneBoundingVolumeTwo.h"
 #include "Gravity.h"
 #include "SphericalJoint.h"
+#include "SimulationManager.h"
 
 SceneBoundingVolumeTwo::SceneBoundingVolumeTwo()
 {
@@ -11,6 +12,7 @@ SceneBoundingVolumeTwo::~SceneBoundingVolumeTwo()
 {
 }
 void SceneBoundingVolumeTwo::initializeScene(){
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(false);
 timer = 0;
 Real damper = 10;
 Real springConstant = 100;

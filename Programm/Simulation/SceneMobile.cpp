@@ -4,6 +4,7 @@
 #include "SphericalJoint.h"
 #include "Spring.h"
 #include "Sphere.h"
+#include "SimulationManager.h"
 
 SceneMobile::SceneMobile()
 {
@@ -18,6 +19,7 @@ SceneMobile::~SceneMobile()
 
 void SceneMobile::initializeScene()
 {
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(false);
 	Real y = 2;
 
 	Gravity::create();

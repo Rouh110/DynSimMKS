@@ -30,12 +30,16 @@ public:
 		Vector3d pointB;
 		RigidBody *rigidBodyA;
 		RigidBody *rigidBodyB;
+		bool collision;
 	};
 protected:
 	ApproximationMethod approximationMethod;
 	bool collisionCheck = true;
+	bool checkYCollition = true;
+	Real contactConstant = 0.01;
 	unsigned int iterationCount;
 	list<BoundingVolume*> collidedBoundingVolumes;
+
 	
 public:
 	Simulation();
@@ -54,6 +58,12 @@ public:
 	*/
 	void setCollisionCheck(bool check);
 	bool getCollisionCheck();
+
+	void setcheckYCollition(bool check);
+	bool getcheckYCollition();
+
+	void setContactConstant(Real check);
+	Real getContactConstant();
 
 	/*
 	Calculate the matrix K vor the given RigidBody.
@@ -155,6 +165,7 @@ protected:
 
 	void brianMitrichCheck(const vector<CollisionInfo>& collisions, vector<CollisionInfo>& result);
 	
+	void calcCollisionDeltaURelN(const CollisionInfo & collisionInfo, Vector3d & out_deltaURelN);
 	/*
 	bool collisionTestYAxis(RigidBody* rigidBody, BoundingVolume* boundingVolume);
 	bool collisionTest(RigidBody* rigidBodyA, BoundingVolume* volumeA, RigidBody* rigidBodyB, BoundingVolume* volumeB);

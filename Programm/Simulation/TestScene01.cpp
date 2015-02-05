@@ -3,6 +3,7 @@
 #include "Gravity.h"
 #include "Spring.h"
 #include "Sphere.h"
+#include "SimulationManager.h"
 TestScene01::TestScene01()
 {
 	this->name = "SpringTest";
@@ -15,6 +16,8 @@ TestScene01::~TestScene01()
 
 void TestScene01::initializeScene()
 {
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(false);
+
 	Real damper = 50;
 	Real constant = 50;
 	Cube &cube01 = Cube::create();

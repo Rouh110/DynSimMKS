@@ -6,6 +6,7 @@
 #include "SphericalJoint.h"
 #include "Spring.h"
 #include "Sphere.h"
+#include "SimulationManager.h"
 
 using namespace Eigen;
 ImpulseTest::ImpulseTest()
@@ -21,7 +22,7 @@ ImpulseTest::~ImpulseTest()
 
  void ImpulseTest::initializeScene()
 {
-	 
+	 SimulationManager::getInstance()->getSimulation().setCollisionCheck(false);
 	 next = false;
 	 timer = 0;
 	 

@@ -176,6 +176,28 @@ void TW_CALL getCollisionCheckCB(void *value, void *clientData) {
 	*(bool *)(value) = bool(_collisionCheck);
 }
 
+void TW_CALL setCheckYCollisionCB(const void *value, void *clientData)
+{
+	bool _yCollisionCheck = *(const bool *)(value);
+	SimulationManager::getInstance()->getSimulation().setcheckYCollition(_yCollisionCheck);
+}
+void TW_CALL getCheckYCollisionCB(void *value, void *clientData)
+{
+	bool _yCollisionCheck = SimulationManager::getInstance()->getSimulation().getcheckYCollition();
+	*(bool *)(value) = bool(_yCollisionCheck);
+}
+
+void TW_CALL setContactConstantCB(const void *value, void *clientData)
+{
+	Real contactConstant = *(const Real *)(value);
+	SimulationManager::getInstance()->getSimulation().setContactConstant(contactConstant);
+}
+void TW_CALL getContactConstantCB(void *value, void *clientData)
+{
+	Real contactConstant = SimulationManager::getInstance()->getSimulation().getContactConstant();
+	*(Real *)(value) = Real(contactConstant);
+}
+
 void TW_CALL resetSimBTN(void *clientData) {
 	// Call rest sim function
 	resetSim();
@@ -243,8 +265,12 @@ int main( int argc, char **argv )
 	TwAddVarCB(MiniGL::m_tweakBar, "Tree Draw", TW_TYPE_BOOL32, setTreeDrawCB, getTreeDrawCB, NULL, "");
 	// Set Collision Check
 	TwAddVarCB(MiniGL::m_tweakBar, "Collision Check", TW_TYPE_BOOL32, setCollisionCheckCB, getCollisionCheckCB, NULL, "");
+	// Set Y-Collision Check
+	TwAddVarCB(MiniGL::m_tweakBar, "Y-Collision Check", TW_TYPE_BOOL32, setCheckYCollisionCB, getCheckYCollisionCB, NULL, "");
 	// Set Collision Draw
 	TwAddVarCB(MiniGL::m_tweakBar, "Collision Draw", TW_TYPE_BOOL32, setCollisionDrawCB, getCollisionDrawCB, NULL, "");
+
+	TwAddVarCB(MiniGL::m_tweakBar, "Contact Constant", TW_TYPE_DOUBLE, setContactConstantCB, getContactConstantCB, NULL, "min = 0 max = 1 step = 0.0001");
 
 	buildModel ();	
 	

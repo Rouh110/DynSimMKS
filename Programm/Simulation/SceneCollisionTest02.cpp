@@ -1,5 +1,5 @@
 #include "SceneCollisionTest02.h"
-
+#include "SimulationManager.h"
 
 SceneCollisionTest02::SceneCollisionTest02()
 {
@@ -14,6 +14,10 @@ SceneCollisionTest02::~SceneCollisionTest02()
 
 void SceneCollisionTest02::initializeScene()
 {
+	SimulationManager::getInstance()->getSimulation().setContactConstant(0);
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(true);
+	SimulationManager::getInstance()->getSimulation().setcheckYCollition(true);
+
 	timer = 0;
 	next = false;
 
@@ -49,6 +53,8 @@ void SceneCollisionTest02::initializeScene()
 
 	sphere02 = &Sphere::create(0.5);
 	sphere02->setPosition(Vector3d(x2, y2, 0));
+	sphere07 = &Sphere::create(0.5);
+	sphere07->setPosition(Vector3d(x2, y2+1, 0));
 	sphere03 = &Sphere::create(0.5);
 	sphere03->setPosition(Vector3d(x3, y2, 0));
 	
@@ -84,6 +90,7 @@ void SceneCollisionTest02::update(Real currentTime)
 			break;
 		case 2:
 			sphere02->addRasImpuls(Vector3d(0, -0.1, 0), Vector3d(0, 0, 0));
+			sphere07->addRasImpuls(Vector3d(0, -0.1, 0), Vector3d(0, 0, 0));
 			break;
 		case 3:
 			sphere03->addRasImpuls(Vector3d(0, -3, 0), Vector3d(0, 0, 0));

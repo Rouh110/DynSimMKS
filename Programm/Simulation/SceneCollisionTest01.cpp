@@ -1,5 +1,5 @@
 #include "SceneCollisionTest01.h"
-
+#include "SimulationManager.h"
 
 SceneCollisionTest01::SceneCollisionTest01()
 {
@@ -14,6 +14,12 @@ SceneCollisionTest01::~SceneCollisionTest01()
 
 void SceneCollisionTest01::initializeScene()
 {
+
+	
+	SimulationManager::getInstance()->getSimulation().setContactConstant(0);
+
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(true);
+	SimulationManager::getInstance()->getSimulation().setcheckYCollition(true);
 	timer = 0;
 	next = false;
 

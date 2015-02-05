@@ -4,6 +4,7 @@
 #include "Cube.h"
 #include "Spring.h"
 #include "SphericalJoint.h"
+#include "SimulationManager.h"
 
 ScenePuppet::ScenePuppet()
 {
@@ -17,6 +18,7 @@ ScenePuppet::~ScenePuppet()
 
 void ScenePuppet::initializeScene()
 {
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(false);
 	Real damper = 10;
 	Real springConstant = 100;
 

@@ -8,6 +8,7 @@
 #include "TimeManager.h"
 #include "Common/StringTools.h"
 #include "Common/timing.h"
+#include "SimulationManager.h"
 
 SceneBoundingVolume::SceneBoundingVolume()
 {
@@ -18,6 +19,7 @@ SceneBoundingVolume::~SceneBoundingVolume()
 {
 }
 void SceneBoundingVolume::initializeScene(){
+	SimulationManager::getInstance()->getSimulation().setCollisionCheck(false);
 	timer = 0;
 	Gravity::create();
 
