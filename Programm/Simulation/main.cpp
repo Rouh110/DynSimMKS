@@ -48,6 +48,8 @@
 #include "SceneCollisionTest01.h"
 #include "SceneCollisionTest02.h"
 #include "SceneCollisionTest03.h"
+#include "SceneStressTest01.h"
+#include "SceneStressTest02.h"
 #include <list>
 
 
@@ -327,6 +329,8 @@ void addScenes()
 	addScene(new SceneCollisionTest01());
 	addScene(new SceneCollisionTest02());
 	addScene(new SceneCollisionTest03());
+	addScene(new SceneStressTest01());
+	addScene(new SceneStressTest02());
 }
 
 void buildModel ()
