@@ -25,7 +25,7 @@ protected:
 	Eigen::Vector3d impulse;
 	Eigen::Vector3d torqueImpulse;
 	BoundingVolumeTree volumeTree;
-	double elasticity = 1;
+	double elasticity = 0.5;
 public:
 	RigidBody();
 	~RigidBody();

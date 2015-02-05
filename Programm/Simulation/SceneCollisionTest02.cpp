@@ -35,13 +35,17 @@ void SceneCollisionTest02::initializeScene()
 	//cube02->setPosition(Vector3d(x2,y,0));
 	sphere01 = &Sphere::create(0.5);
 	sphere01->setPosition(Vector3d(x3, y, 0));
+	sphere01->setElasticity(1);
 	sphere04 = &Sphere::create(0.5);
 	sphere04->setPosition(Vector3d(x2, y, 0));
-	
+	sphere04->setElasticity(1);
+
 	Sphere &sphere05 = Sphere::create(0.5);
 	sphere05.setPosition(Vector3d(x2, y - 1, 0));
+	sphere05.setElasticity(1);
 	Sphere &sphere06 = Sphere::create(0.5);
 	sphere06.setPosition(Vector3d(x2, y - 2, 0));
+	sphere06.setElasticity(1);
 
 	//cube04 = &Cube::create();
 	//cube04->setPosition(Vector3d(x4, y, 0));
@@ -53,10 +57,13 @@ void SceneCollisionTest02::initializeScene()
 
 	sphere02 = &Sphere::create(0.5);
 	sphere02->setPosition(Vector3d(x2, y2, 0));
+	sphere02->setElasticity(1);
 	sphere07 = &Sphere::create(0.5);
 	sphere07->setPosition(Vector3d(x2, y2+1, 0));
+	sphere07->setElasticity(1);
 	sphere03 = &Sphere::create(0.5);
 	sphere03->setPosition(Vector3d(x3, y2, 0));
+	sphere03->setElasticity(1);
 	
 	cube01 = &Cube::create();
 	cube01->setPosition(Vector3d(x1,y,0));

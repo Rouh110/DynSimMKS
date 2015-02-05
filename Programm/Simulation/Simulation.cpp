@@ -880,9 +880,9 @@ void Simulation::computeVeloctyCorrection()
 void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionInfo>& collisions)
 {
 
-	cout << "computeCollisionCorrection \n\n\n\n" << endl;
+	//cout << "computeCollisionCorrection \n\n\n\n" << endl;
 	double maxError = 0.0001;
-	int maxIterations = 100;
+	int maxIterations = 10;
 	bool finnish;
 	int i = 0;
 	
@@ -1151,7 +1151,7 @@ void Simulation::computeCollisionCorrection(const vector<Simulation::CollisionIn
 }
 void Simulation::checkCollision()
 {
-	int maxIterations = 1;
+	int maxIterations = 100;
 	int i = 0;
 	vector<RigidBody*> rigidbodysToCheck;
 	collidedBoundingVolumes.clear();
